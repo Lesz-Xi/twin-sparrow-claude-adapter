@@ -5,11 +5,31 @@ import { join, resolve } from "node:path";
 export const MAX_SKILL_BODY_BYTES = 128 * 1024;
 
 export const ALLOWLISTED_SKILLS = [
-  "pearl-representation",
-  "think-different",
-  "oppus-reasoning-contract",
   "architect-review",
+  "code-quality-skill",
+  "create-paper",
+  "crucible-doctrine",
+  "deep-audit",
+  "deep-structure-learning",
+  "design-engineer",
   "expert-engineer",
+  "expert-review",
+  "first-principles-thinking",
+  "japanese-design",
+  "lifetime-research",
+  "masa-dual-core-personas",
+  "oppus-reasoning-contract",
+  "pearl-representation",
+  "product-design",
+  "rigorous-audit",
+  "sequential-thinking",
+  "theory-creation",
+  "think-different",
+  "twin-sparrow-apps",
+  "twin-sparrow-computer-use",
+  "twin-sparrow-taste",
+  "work-backward",
+  "youtube-transcript",
 ] as const;
 
 export type AllowlistedSkillName = (typeof ALLOWLISTED_SKILLS)[number];

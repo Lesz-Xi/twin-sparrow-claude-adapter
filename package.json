@@ -9,7 +9,9 @@
     "build": "tsc -p tsconfig.json",
     "test": "npm run build && node --test dist/tests/**/*.test.js",
     "check": "npm run test",
-    "twin:status": "node dist/src/commands/twin-status.js"
+    "twin:status": "node dist/src/commands/twin-status.js",
+    "skills:generate": "npm run build && node scripts/generate-skill-plugin.mjs",
+    "skills:check": "npm run build && node scripts/generate-skill-plugin.mjs --check"
   },
   "engines": {
     "node": ">=20.0.0"

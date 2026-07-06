@@ -114,6 +114,38 @@ test("10 consecutive Solaris turns require a concrete-path check-in", () => {
   assert.match(result.outputJson.hookSpecificOutput.additionalContext, /Check-in required: yes \/ solaris_stalled/);
 });
 
+test("namespaced Solaris slash command treats trailing text as payload, not visible routing content", () => {
+  const statePath = tempStatePath();
+  handleSessionStart({ statePath, now: "2026-07-06T00:00:00.000Z" });
+
+  const result = handleUserPromptSubmit(userPromptSubmitFixture("/twin-sparrow:solaris Hey, Chief"), {
+    statePath,
+    now: "2026-07-06T00:02:30.000Z",
+  });
+
+  assert.equal(result.state.companion.orientation, "solaris");
+  assert.equal(result.state.companion.signal, "explicit_override");
+  assert.equal(result.state.workingState.goal, "Hey, Chief");
+  assert.match(result.outputJson.hookSpecificOutput.additionalContext, /\/twin-sparrow:solaris is routing metadata/);
+  assert.match(result.outputJson.hookSpecificOutput.additionalContext, /User payload after command: "Hey, Chief"/);
+  assert.match(result.outputJson.hookSpecificOutput.additionalContext, /Do not narrate the solaris switch/);
+});
+
+test("bare Atoman slash command activates mode without exposing command text as goal", () => {
+  const statePath = tempStatePath();
+  handleSessionStart({ statePath, now: "2026-07-06T00:00:00.000Z" });
+
+  const result = handleUserPromptSubmit(userPromptSubmitFixture("/atoman"), {
+    statePath,
+    now: "2026-07-06T00:02:45.000Z",
+  });
+
+  assert.equal(result.state.companion.orientation, "atoman");
+  assert.equal(result.state.companion.signal, "explicit_override");
+  assert.equal(result.state.workingState.goal, "atoman mode");
+  assert.match(result.outputJson.hookSpecificOutput.additionalContext, /Do not narrate the atoman switch/);
+});
+
 test("/represent prompt activates the Pearl skill gate capsule", () => {
   const statePath = tempStatePath();
   const result = handleUserPromptSubmit(nestedUserPromptSubmitFixture("Use /represent on this adapter architecture"), {

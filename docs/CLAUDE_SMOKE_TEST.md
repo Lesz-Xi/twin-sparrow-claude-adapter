@@ -150,8 +150,22 @@ Failure interpretation:
 
 ### 3. `/twin-status` executable target
 
+From the adapter repo root:
+
+```bash
+npm run twin:status
+```
+
+Equivalent direct target from the adapter repo root:
+
 ```bash
 node dist/src/commands/twin-status.js
+```
+
+Direct target from the parent `Twin-Sparrow` workspace root:
+
+```bash
+node twin-sparrow-claude-adapter/dist/src/commands/twin-status.js
 ```
 
 Expected evidence:
@@ -576,16 +590,28 @@ Notes:
 
 ### Test 10 — Operator status surface
 
-If native slash command registration is available, try:
+If native slash command registration is available in the current Claude Code/plugin surface, try:
 
 ```text
 /twin-status
 ```
 
-If native slash command registration is not available, run executable target:
+or the namespaced form:
+
+```text
+/twin-sparrow:twin-status
+```
+
+If native slash command registration is not available in the current Claude surface, run the executable target from the adapter repo root:
 
 ```bash
-node dist/src/commands/twin-status.js
+npm run twin:status
+```
+
+or from the parent `Twin-Sparrow` workspace root:
+
+```bash
+node twin-sparrow-claude-adapter/dist/src/commands/twin-status.js
 ```
 
 Expected evidence:

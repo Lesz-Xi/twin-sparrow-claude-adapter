@@ -8,11 +8,11 @@ import { SOURCE_GROUNDING_CAPSULE_CLASS } from "../capsules/source-grounding-cap
 import { TOKEN_ECONOMICS_CAPSULE_CLASS } from "../capsules/token-economics-capsule.js";
 import { WORKING_STATE_CAPSULE_CLASS } from "../capsules/working-state-capsule.js";
 import { classifyPrompt, requiresSourceGrounding, type PromptClassification } from "../routing/prompt-classifier.js";
-import { applyCompanionDecision, routeCompanion } from "../routing/companion-router.js";
+import { applyCompanionDecision, routeCompanion, type CompanionRoutingDecision } from "../routing/companion-router.js";
 import { hydrateSkillBody } from "../skills/skill-registry.js";
 import { appendLedgerEvent, resolveDefaultLedgerPath } from "../state/ledger.js";
 import { readTwinAdapterState, resolveDefaultStatePath, writeTwinAdapterState } from "../state/safe-state-store.js";
-import type { ArtifactPointer, ArtifactType, SourceGroundingMode, SourcePointer, SourceStatus, TwinAdapterState, WorkingStateActiveFile } from "../state/schema.js";
+import type { ArtifactPointer, ArtifactType, CompanionOrientation, SourceGroundingMode, SourcePointer, SourceStatus, TwinAdapterState, WorkingStateActiveFile } from "../state/schema.js";
 
 export interface TurnRouterOptions {
   readonly statePath?: string;
@@ -69,6 +69,39 @@ function parsePayload(raw: string): unknown {
   } catch {
     return trimmed;
   }
+}
+
+interface CompanionSlashCommand {
+  readonly command: CompanionOrientation;
+  readonly rawCommand: string;
+  readonly payload: string;
+}
+
+function parseCompanionSlashCommand(promptText: string): CompanionSlashCommand | null {
+  const match = promptText.match(/^\/\s*((?:twin-sparrow:)?(?:solaris|atoman))(?:\s+([\s\S]*))?$/i);
+  if (!match) return null;
+  const rawCommand = match[1] ?? "";
+  const commandName = rawCommand.toLowerCase().replace(/^twin-sparrow:/, "");
+  if (commandName !== "solaris" && commandName !== "atoman") return null;
+  return {
+    command: commandName,
+    rawCommand: `/${rawCommand}`,
+    payload: (match[2] ?? "").trim(),
+  };
+}
+
+function companionCommandDecision(command: CompanionSlashCommand): CompanionRoutingDecision {
+  return {
+    orientation: command.command,
+    certainty: "high",
+    signal: "explicit_override",
+    preservedContinuity: false,
+  };
+}
+
+function effectivePromptText(promptText: string, command: CompanionSlashCommand | null): string {
+  if (!command) return promptText;
+  return command.payload || `${command.command} mode`;
 }
 
 function inferTaskType(labels: readonly PromptClassification[]): TwinAdapterState["workingState"]["taskType"] {
@@ -218,8 +251,15 @@ function mergeArtifacts(prior: readonly ArtifactPointer[], next: readonly Artifa
   return Array.from(byPath.values()).slice(0, 12);
 }
 
-function buildEstablishedFacts(labels: readonly PromptClassification[], activeSkills: readonly string[], sourceRequired: boolean, artifactCount: number): readonly string[] {
+function quoteCompact(value: string): string {
+  const compact = value.replace(/\s+/g, " ").trim();
+  return compact.length > 120 ? `${compact.slice(0, 117)}...` : compact;
+}
+
+function buildEstablishedFacts(labels: readonly PromptClassification[], activeSkills: readonly string[], sourceRequired: boolean, artifactCount: number, command: CompanionSlashCommand | null): readonly string[] {
   const facts: string[] = [];
+  if (command) facts.push(`${command.rawCommand} is routing metadata, not user-facing content to answer or explain.`);
+  if (command?.payload) facts.push(`User payload after command: "${quoteCompact(command.payload)}".`);
   if (labels.length > 0) facts.push(`Prompt classifications: ${labels.join(", ")}.`);
   if (activeSkills.length > 0) facts.push(`Active skill gates: ${activeSkills.join(", ")}.`);
   if (sourceRequired) facts.push("This turn requires source-grounding discipline.");
@@ -227,8 +267,9 @@ function buildEstablishedFacts(labels: readonly PromptClassification[], activeSk
   return facts;
 }
 
-function buildPendingActions(activeSkills: readonly string[], sourceRequired: boolean, artifactCount: number): readonly string[] {
+function buildPendingActions(activeSkills: readonly string[], sourceRequired: boolean, artifactCount: number, command: CompanionSlashCommand | null): readonly string[] {
   const actions = [activeSkills.length > 0 ? "Apply active skill gate before answering." : "Answer with compact Twin-Sparrow runtime context."];
+  if (command) actions.push(`Do not narrate the ${command.command} switch; answer only the payload or give a brief ready acknowledgment if no payload was supplied.`);
   if (sourceRequired) actions.push("Do not answer as source-grounded until admitted source text is available.");
   if (artifactCount > 0) actions.push("Evaluate artifact and require explicit approval before treating it as implementation authority.");
   return actions;
@@ -247,17 +288,19 @@ export function handleUserPromptSubmit(rawPayload: string, options: TurnRouterOp
   const now = options.now ?? new Date().toISOString();
   const payload = parsePayload(rawPayload);
   const promptText = extractPromptText(payload);
-  const labels = classifyPrompt(promptText);
+  const companionCommand = parseCompanionSlashCommand(promptText);
+  const routedPromptText = effectivePromptText(promptText, companionCommand);
+  const labels = classifyPrompt(routedPromptText);
   const read = readTwinAdapterState(statePath);
-  const decision = routeCompanion(promptText, read.state.companion.orientation);
-  const fullHydrationRequests = resolveFullSkillHydrationRequests(promptText);
+  const decision = companionCommand ? companionCommandDecision(companionCommand) : routeCompanion(routedPromptText, read.state.companion.orientation);
+  const fullHydrationRequests = resolveFullSkillHydrationRequests(routedPromptText);
   const hydrationOptions = options.skillRoot ? { skillRoot: options.skillRoot } : {};
   const hydrationRecords = fullHydrationRequests.map((name) => hydrateSkillBody(name, hydrationOptions));
-  const activeSkills = unique([...resolveSkillGates(promptText), ...fullHydrationRequests]);
+  const activeSkills = unique([...resolveSkillGates(routedPromptText), ...fullHydrationRequests]);
   const sourceRequired = requiresSourceGrounding(labels);
-  const sources = sourceRequired ? [...sourcePointersFromPayload(payload), ...sourcePointersFromPrompt(promptText)].slice(0, 8) : [];
+  const sources = sourceRequired ? [...sourcePointersFromPayload(payload), ...sourcePointersFromPrompt(routedPromptText)].slice(0, 8) : [];
   const sourceMode = inferSourceMode(sourceRequired, sources);
-  const newArtifacts = [...artifactPointersFromPayload(payload), ...artifactPointersFromPrompt(promptText, labels)];
+  const newArtifacts = [...artifactPointersFromPayload(payload), ...artifactPointersFromPrompt(routedPromptText, labels)];
   const pendingReview = mergeArtifacts(read.state.artifacts.pendingReview, newArtifacts);
   const artifactReviewRequired = pendingReview.length > 0;
   const tokenEconomicsRequested = labels.includes("token-economics");
@@ -284,11 +327,11 @@ export function handleUserPromptSubmit(rawPayload: string, options: TurnRouterOp
       sources,
     },
     workingState: {
-      goal: promptText ? promptText.slice(0, 240) : routed.workingState.goal,
+      goal: routedPromptText ? routedPromptText.slice(0, 240) : routed.workingState.goal,
       taskType: inferTaskType(labels),
-      activeFiles: deriveActiveFiles(promptText, labels, routed.workingState.activeFiles),
-      establishedFacts: buildEstablishedFacts(labels, activeSkills, sourceRequired, pendingReview.length),
-      pendingActions: buildPendingActions(activeSkills, sourceRequired, pendingReview.length),
+      activeFiles: deriveActiveFiles(routedPromptText, labels, routed.workingState.activeFiles),
+      establishedFacts: buildEstablishedFacts(labels, activeSkills, sourceRequired, pendingReview.length, companionCommand),
+      pendingActions: buildPendingActions(activeSkills, sourceRequired, pendingReview.length, companionCommand),
       verification: buildVerification(labels, sourceRequired, pendingReview.length),
       nextStep: activeSkills.length > 0 ? "Apply active skill gate with compact capsule." : artifactReviewRequired ? "Evaluate artifact and keep approval gate visible." : sourceRequired ? "Acquire or verify source text before grounded answer." : "Answer with compact Twin-Sparrow runtime context.",
     },
