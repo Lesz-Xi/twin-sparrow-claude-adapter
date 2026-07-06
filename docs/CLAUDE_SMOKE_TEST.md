@@ -58,7 +58,7 @@ npm run test
 Expected local result:
 
 ```text
-24 tests passing
+51 tests passing
 0 failures
 ```
 
@@ -67,6 +67,8 @@ Build artifacts expected after test/build:
 ```text
 dist/src/hooks/twin-session-start.js
 dist/src/hooks/twin-turn-router.js
+dist/src/hooks/twin-posttooluse-instrument.js
+dist/src/hooks/twin-verification-gate.js
 dist/src/commands/twin-status.js
 ```
 
@@ -641,6 +643,70 @@ Notes:
 
 ---
 
+### Test 11 — Verification gate blocks close until real pass evidence
+
+This validates the retrospective catch layer (`PostToolUse` instrument + `Stop` gate).
+
+Manual preflight (before live Claude):
+
+```bash
+# 1. Seed a closing-phase state with an open test obligation, then ask the gate:
+echo '{"hookEventName":"Stop","stop_hook_active":false}' \
+  | node dist/src/hooks/twin-verification-gate.js
+# Expected: {"decision":"block","reason":"...proof obligations are unmet..."}
+# (Only when state phase is verifying/closing with open verification.required.)
+
+# 2. Feed the instrument unambiguous pass evidence for a test command:
+echo '{"hookEventName":"PostToolUse","tool_name":"Bash","tool_input":{"command":"npm test"},"tool_response":{"stdout":"ok","stderr":"","interrupted":false}}' \
+  | node dist/src/hooks/twin-posttooluse-instrument.js
+# Expected: state verification.completed now contains the test obligation;
+# ledger gains a verification_obligation_closed event.
+
+# 3. Re-ask the gate:
+echo '{"hookEventName":"Stop","stop_hook_active":false}' \
+  | node dist/src/hooks/twin-verification-gate.js
+# Expected: {} — clean close.
+```
+
+Live sequence:
+
+1. Give Claude an implementation task (opens `Run local tests after code changes.` in `verification.required`).
+2. Steer the arc to `verifying`/`closing` (e.g. an artifact-evaluation or closure prompt) **without** running tests.
+3. Let Claude try to finish the turn.
+
+Expected evidence:
+
+- Claude receives a Stop block naming the unmet obligation and continues working instead of closing.
+- After Claude runs a real passing `npm test`, the `PostToolUse` instrument writes `verification.completed` and the next Stop passes cleanly.
+- Ledger shows `verification_gate_block`, then `verification_obligation_closed`.
+- A failing test run instead logs `verification_caught_error` and the gate keeps blocking (up to the per-arc cap).
+
+Loop-safety checks (must both hold):
+
+- When Claude is already continuing from a block, `stop_hook_active: true` is honored — no re-block.
+- After 2 blocks in one arc, the gate degrades to a warning (`verification_gate_warn` in ledger) and allows close.
+
+Pass condition:
+
+- Block → real check → clean close, with all three ledger event types observable and no infinite loop.
+
+Fail condition:
+
+- Gate blocks outside `verifying`/`closing` phases.
+- An obligation closes without explicit pass evidence (false pass).
+- Stop loop does not terminate.
+
+Record:
+
+```text
+Verification gate catch: pass/fail
+Ledger events observed:
+Blocks before clean close:
+Notes:
+```
+
+---
+
 ## Evidence to preserve
 
 For each live run, preserve:
@@ -686,6 +752,7 @@ Skill root:
 [ ] Test 8 — artifact review gate
 [ ] Test 9 — token economics honesty
 [ ] Test 10 — operator status surface
+[ ] Test 11 — verification gate catch layer
 
 Overall result: pass / partial / fail
 Blocking failures:
