@@ -1,0 +1,21 @@
+{
+  "name": "twin-sparrow-claude-adapter",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Token-efficient Claude Code adapter for Twin-Sparrow runtime capsules.",
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test dist/tests/**/*.test.js",
+    "check": "npm run test",
+    "twin:status": "node dist/src/commands/twin-status.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "typescript": "^5.7.3"
+  }
+}

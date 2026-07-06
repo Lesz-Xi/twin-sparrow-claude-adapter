@@ -1,0 +1,30 @@
+{
+  "name": "twin-sparrow",
+  "description": "Token-efficient Twin-Sparrow runtime capsule adapter for Claude Code.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/dist/src/hooks/twin-session-start.js\"",
+            "timeout": 5,
+            "statusMessage": "Loading Twin-Sparrow runtime capsule..."
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/dist/src/hooks/twin-turn-router.js\"",
+            "timeout": 5,
+            "statusMessage": "Routing Twin-Sparrow capsule..."
+          }
+        ]
+      }
+    ]
+  }
+}
