@@ -1,12 +1,21 @@
-# Twin-Sparrow Claude Adapter
+<p align="center">
+  <img src="assets/cover.svg" alt="Twin-Sparrow Claude Adapter" width="100%">
+</p>
 
-Token-efficient Claude Code adapter for Twin-Sparrow.
+<h1 align="center">Twin-Sparrow Claude Adapter</h1>
+
+<p align="center">
+  Token-efficient Claude Code adapter for Twin-Sparrow —
+  one companion, two activations (<strong>Solaris</strong> &amp; <strong>Atoman</strong>).
+</p>
+
+---
 
 ## Purpose
 
-This project exists to let Claude use Twin-Sparrow’s architecture without replaying the full Twin-Sparrow doctrine, memory, skills, source context, and working state on every turn.
+This project lets Claude use Twin-Sparrow’s architecture **without replaying the full Twin-Sparrow doctrine, memory, skills, source context, and working state on every turn**.
 
-The core representation is:
+Instead of one heavy system prompt, each turn injects only the smallest faithful runtime slice needed:
 
 ```text
 Claude hook event
@@ -20,36 +29,33 @@ Claude hook event
 
 Twin-Sparrow should feel present inside Claude while Claude receives only the smallest faithful runtime slice needed for the current turn.
 
+## Capabilities at a glance
+
+| Area | What it does |
+|------|--------------|
+| **Companion continuity** | Closure ownership, weak/new-arc preservation, 10-turn check-ins |
+| **Working state** | Tracks active files, facts, pending actions, and verification |
+| **Source grounding** | Blocks answers that require missing source content |
+| **Artifact review** | Approval-required gate for consequential actions |
+| **Token economics** | Estimates-only ledger — no unproven savings claims |
+| **Skill gates** | Fail-closed hydration of the allowlisted Twin-Sparrow skill inventory |
+
 ## Current status
 
-Initial runnable adapter skeleton implemented.
-
-Implemented:
+Initial runnable adapter skeleton implemented — the runtime plumbing and every capsule above are in place:
 
 - Claude plugin metadata manifest and `hooks/hooks.json`
-- SessionStart tiny Twin contract
-- UserPromptSubmit turn router
-- safe JSON state store
-- append-only JSONL session ledger
-- companion continuity capsule with closure ownership, weak/new-arc preservation, and 10-turn check-ins
-- working-state capsule with active files, facts, pending actions, and verification
-- source-grounding capsule with missing-source blocking
-- artifact-review capsule with approval-required action gate
-- token-economics capsule with estimates-only metrics
-- minimal skill gate capsule
-- allowlisted full skill hydration for the local Twin-Sparrow skill inventory with fail-closed unknown skill behavior
+- `SessionStart` tiny Twin contract and `UserPromptSubmit` turn router
+- safe JSON state store and append-only JSONL session ledger
+- the six runtime capsules listed under [Capabilities](#capabilities-at-a-glance)
 - read-only `/twin-status` operator command target
-- Node test fixtures
-- `docs/HONEST_NUMBERS.md`
-- `docs/CLAUDE_SMOKE_TEST.md`
+- Node test fixtures, `docs/HONEST_NUMBERS.md`, and `docs/CLAUDE_SMOKE_TEST.md`
 
 Verify locally:
 
 ```bash
 npm run test
 ```
-
-Current verification: run `npm run test` in this folder.
 
 ## Claude Desktop MCP launcher
 
