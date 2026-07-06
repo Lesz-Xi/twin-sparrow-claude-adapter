@@ -260,6 +260,8 @@ cd /Users/lesz/Developer/Twin-Sparrow/twin-sparrow-claude-adapter && npm run tes
 
 Result: 24 tests passed.
 
+Compatibility note added later: observed Claude Code plugin layout keeps metadata in `.claude-plugin/plugin.json` and hooks in `hooks/hooks.json`; adapter now follows that shape and verifies it in tests.
+
 Remaining debt:
 
 - Phase 11 live Claude validation now needs smoke-test docs and real Claude hook/command behavior validation.
@@ -283,7 +285,7 @@ Verification:
 cd /Users/lesz/Developer/Twin-Sparrow/twin-sparrow-claude-adapter && npm run test
 ```
 
-Result: 24 tests passed.
+Result: 25 tests passed.
 
 Remaining debt:
 

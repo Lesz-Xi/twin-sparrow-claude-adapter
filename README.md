@@ -26,7 +26,7 @@ Initial runnable adapter skeleton implemented.
 
 Implemented:
 
-- Claude plugin manifest
+- Claude plugin metadata manifest and `hooks/hooks.json`
 - SessionStart tiny Twin contract
 - UserPromptSubmit turn router
 - safe JSON state store
@@ -49,7 +49,7 @@ Verify locally:
 npm run test
 ```
 
-Current verification: 24 tests passing.
+Current verification: 25 tests passing.
 
 ## Next implementation slice
 

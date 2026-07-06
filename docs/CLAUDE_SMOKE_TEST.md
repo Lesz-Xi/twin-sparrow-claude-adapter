@@ -11,7 +11,7 @@ Local TypeScript behavior is test-covered. Live Claude behavior is not yet prove
 
 The smoke test must answer four questions:
 
-1. Does Claude execute the plugin hooks from `.claude-plugin/plugin.json`?
+1. Does Claude execute the plugin hooks from `hooks/hooks.json` after loading `.claude-plugin/plugin.json` metadata?
 2. Does `additionalContext` from hook stdout actually enter Claude's model context?
 3. Does local adapter state persist across a real Claude session?
 4. Can the operator inspect adapter state through `/twin-status` or the executable status target?
@@ -70,10 +70,16 @@ dist/src/hooks/twin-turn-router.js
 dist/src/commands/twin-status.js
 ```
 
-Plugin manifest expected at:
+Plugin metadata manifest expected at:
 
 ```text
 .claude-plugin/plugin.json
+```
+
+Hook manifest expected at:
+
+```text
+hooks/hooks.json
 ```
 
 Default adapter state path:
