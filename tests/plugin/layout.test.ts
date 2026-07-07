@@ -8,6 +8,11 @@ test("Claude plugin layout keeps metadata and hooks in observed Claude Code shap
     readonly version?: string;
     readonly hooks?: unknown;
   };
+  const packageJson = JSON.parse(readFileSync("package.json", "utf8")) as { readonly version?: string };
+  const marketplace = JSON.parse(readFileSync(".claude-plugin/marketplace.json", "utf8")) as {
+    readonly metadata?: { readonly version?: string };
+    readonly plugins?: readonly { readonly name?: string; readonly version?: string }[];
+  };
   const hooks = JSON.parse(readFileSync("hooks/hooks.json", "utf8")) as {
     readonly hooks?: {
       readonly SessionStart?: readonly unknown[];
@@ -19,7 +24,9 @@ test("Claude plugin layout keeps metadata and hooks in observed Claude Code shap
   };
 
   assert.equal(plugin.name, "twin-sparrow");
-  assert.equal(plugin.version, "0.0.0");
+  assert.equal(plugin.version, packageJson.version);
+  assert.equal(marketplace.metadata?.version, packageJson.version);
+  assert.equal(marketplace.plugins?.find((entry) => entry.name === "twin-sparrow")?.version, packageJson.version);
   assert.equal(plugin.hooks, undefined);
   assert.ok(Array.isArray(hooks.hooks?.SessionStart));
   assert.ok(Array.isArray(hooks.hooks?.UserPromptSubmit));

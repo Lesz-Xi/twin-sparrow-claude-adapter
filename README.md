@@ -126,6 +126,12 @@ Rules encoded by the generator:
 Restart Claude Desktop / Claude Code after regenerating so it reloads the plugin's command and
 skill list.
 
+If the plugin was installed from the local marketplace, remember that Claude caches installed
+plugins by marketplace/plugin version. After changing generated `skills/` or `commands/`, bump the
+versions in `package.json`, `.claude-plugin/plugin.json`, and `.claude-plugin/marketplace.json`,
+push the repo, update the installed marketplace clone, then restart Claude so it installs the new
+versioned plugin cache. A restart alone may keep serving the old cached version.
+
 ## Next implementation slice
 
 1. Run the live Claude smoke test from `docs/CLAUDE_SMOKE_TEST.md`, including Test 11

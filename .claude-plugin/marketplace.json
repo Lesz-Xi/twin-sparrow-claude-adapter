@@ -5,13 +5,13 @@
   },
   "metadata": {
     "description": "Local marketplace exposing the twin-sparrow Claude Code plugin (companion continuity, capsules, and Twin-Sparrow skill surface).",
-    "version": "0.0.0"
+    "version": "0.0.1"
   },
   "plugins": [
     {
       "name": "twin-sparrow",
       "description": "Token-efficient Twin-Sparrow runtime capsule adapter for Claude Code.",
-      "version": "0.0.0",
+      "version": "0.0.1",
       "author": {
         "name": "Lesz-Xi"
       },
