@@ -17,6 +17,7 @@ export const ALLOWLISTED_SKILLS = [
   "first-principles-thinking",
   "japanese-design",
   "lifetime-research",
+  "literature-arxiv",
   "masa-dual-core-personas",
   "oppus-reasoning-contract",
   "pearl-representation",

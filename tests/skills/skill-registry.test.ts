@@ -27,6 +27,7 @@ test("allowlisted skills include the Twin-Sparrow local skill inventory", () => 
     "first-principles-thinking",
     "japanese-design",
     "lifetime-research",
+    "literature-arxiv",
     "masa-dual-core-personas",
     "oppus-reasoning-contract",
     "pearl-representation",
