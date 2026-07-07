@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/cover.svg" alt="Twin-Sparrow Claude Adapter" width="100%">
+  <img src="assets/cover.png" alt="Twin-Sparrow Claude Adapter" width="100%">
 </p>
 
 <h1 align="center">Twin-Sparrow Claude Adapter</h1>
@@ -39,6 +39,7 @@ Twin-Sparrow should feel present inside Claude while Claude receives only the sm
 | **Artifact review** | Approval-required gate for consequential actions |
 | **Token economics** | Estimates-only ledger — no unproven savings claims |
 | **Skill gates** | Fail-closed hydration of the allowlisted Twin-Sparrow skill inventory |
+| **Verification gate** | Blocks turn closure on unmet proof obligations until real pass evidence lands |
 
 ## Current status
 
@@ -46,16 +47,22 @@ Initial runnable adapter skeleton implemented — the runtime plumbing and every
 
 - Claude plugin metadata manifest and `hooks/hooks.json`
 - `SessionStart` tiny Twin contract and `UserPromptSubmit` turn router
+- `PostToolUse` verification instrument and `Stop` verification gate — the retrospective
+  "catch" layer: obligations close only on unambiguous pass evidence, and closure is blocked
+  until they do (loop-bounded — see [docs/VERIFICATION_GATE_HANDOFF.md](docs/VERIFICATION_GATE_HANDOFF.md))
 - safe JSON state store and append-only JSONL session ledger
-- the six runtime capsules listed under [Capabilities](#capabilities-at-a-glance)
+- the seven runtime capsules listed under [Capabilities](#capabilities-at-a-glance)
 - read-only `/twin-status` operator command target
-- Node test fixtures, `docs/HONEST_NUMBERS.md`, and `docs/CLAUDE_SMOKE_TEST.md`
+- Node test fixtures (51 passing), `docs/HONEST_NUMBERS.md`, and `docs/CLAUDE_SMOKE_TEST.md`
 
 Verify locally:
 
 ```bash
 npm run test
 ```
+
+> New or changed hooks in `hooks/hooks.json` are only read when Claude Desktop / Claude Code
+> loads the plugin — restart after pulling changes that touch hook wiring.
 
 ## Claude Desktop MCP launcher
 
@@ -115,10 +122,13 @@ skill list.
 
 ## Next implementation slice
 
-1. Run Phase 11 live Claude smoke test from `docs/CLAUDE_SMOKE_TEST.md`.
+1. Run the live Claude smoke test from `docs/CLAUDE_SMOKE_TEST.md`, including Test 11
+   (verification gate catch layer).
 2. Record pass/fail evidence without claiming token savings.
 3. Fix any hook/manifest/command wiring issues discovered live.
-4. Prepare Phase 12 repo-extraction checklist after live validation.
+4. Export a real catch-rate metric from the ledger (`verification_gate_block` /
+   `verification_caught_error`) once live data exists.
+5. Prepare a repo-extraction checklist after live validation.
 
 ## Boundary
 

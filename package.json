@@ -4,6 +4,8 @@
   "private": true,
   "type": "module",
   "description": "Token-efficient Claude Code adapter for Twin-Sparrow runtime capsules.",
+  "license": "MIT",
+  "author": "Rhine Lesther Tague",
   "scripts": {
     "clean": "rm -rf dist",
     "build": "tsc -p tsconfig.json",
