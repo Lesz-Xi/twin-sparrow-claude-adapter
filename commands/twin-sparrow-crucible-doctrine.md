@@ -3,14 +3,14 @@ description: "Reflective product doctrine for Crucible — use when shaping the 
 argument-hint: "<task, question, or artifact to apply this skill to>"
 ---
 
-# /crucible-doctrine
+# /twin-sparrow-crucible-doctrine
 
 Apply the **crucible-doctrine** skill from the Twin-Sparrow skill registry.
 
 ## Usage
 
 ```
-/crucible-doctrine $ARGUMENTS
+/twin-sparrow-crucible-doctrine $ARGUMENTS
 ```
 
 If arguments are given, treat them as the task, question, or artifact this skill should apply to.

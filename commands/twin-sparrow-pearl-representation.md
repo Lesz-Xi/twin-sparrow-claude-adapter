@@ -3,14 +3,14 @@ description: "Use Judea Pearl-style representation analysis to re-encode a probl
 argument-hint: "<task, question, or artifact to apply this skill to>"
 ---
 
-# /pearl-representation
+# /twin-sparrow-pearl-representation
 
 Apply the **pearl-representation** skill from the Twin-Sparrow skill registry.
 
 ## Usage
 
 ```
-/pearl-representation $ARGUMENTS
+/twin-sparrow-pearl-representation $ARGUMENTS
 ```
 
 If arguments are given, treat them as the task, question, or artifact this skill should apply to.

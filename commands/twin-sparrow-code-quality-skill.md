@@ -3,14 +3,14 @@ description: "Review, refactor, and harden code for correctness, maintainability
 argument-hint: "<task, question, or artifact to apply this skill to>"
 ---
 
-# /code-quality-skill
+# /twin-sparrow-code-quality-skill
 
 Apply the **code-quality-skill** skill from the Twin-Sparrow skill registry.
 
 ## Usage
 
 ```
-/code-quality-skill $ARGUMENTS
+/twin-sparrow-code-quality-skill $ARGUMENTS
 ```
 
 If arguments are given, treat them as the task, question, or artifact this skill should apply to.

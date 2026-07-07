@@ -3,14 +3,14 @@ description: "Use this skill when a problem is stuck, repeatedly patched, confus
 argument-hint: "<task, question, or artifact to apply this skill to>"
 ---
 
-# /work-backward
+# /twin-sparrow-work-backward
 
 Apply the **work-backward** skill from the Twin-Sparrow skill registry.
 
 ## Usage
 
 ```
-/work-backward $ARGUMENTS
+/twin-sparrow-work-backward $ARGUMENTS
 ```
 
 If arguments are given, treat them as the task, question, or artifact this skill should apply to.

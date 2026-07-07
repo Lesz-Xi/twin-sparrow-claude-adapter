@@ -3,14 +3,14 @@ description: "Reframe product, design, strategy, interface, and platform problem
 argument-hint: "<task, question, or artifact to apply this skill to>"
 ---
 
-# /think-different
+# /twin-sparrow-think-different
 
 Apply the **think-different** skill from the Twin-Sparrow skill registry.
 
 ## Usage
 
 ```
-/think-different $ARGUMENTS
+/twin-sparrow-think-different $ARGUMENTS
 ```
 
 If arguments are given, treat them as the task, question, or artifact this skill should apply to.

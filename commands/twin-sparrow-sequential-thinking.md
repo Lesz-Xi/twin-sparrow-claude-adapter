@@ -3,14 +3,14 @@ description: "Use dynamic and reflective step-by-step problem solving for comple
 argument-hint: "<task, question, or artifact to apply this skill to>"
 ---
 
-# /sequential-thinking
+# /twin-sparrow-sequential-thinking
 
 Apply the **sequential-thinking** skill from the Twin-Sparrow skill registry.
 
 ## Usage
 
 ```
-/sequential-thinking $ARGUMENTS
+/twin-sparrow-sequential-thinking $ARGUMENTS
 ```
 
 If arguments are given, treat them as the task, question, or artifact this skill should apply to.

@@ -3,14 +3,14 @@ description: "Combined engineering review applying expert-engineer and code-qual
 argument-hint: "<task, question, or artifact to apply this skill to>"
 ---
 
-# /expert-review
+# /twin-sparrow-expert-review
 
 Apply the **expert-review** skill from the Twin-Sparrow skill registry.
 
 ## Usage
 
 ```
-/expert-review $ARGUMENTS
+/twin-sparrow-expert-review $ARGUMENTS
 ```
 
 If arguments are given, treat them as the task, question, or artifact this skill should apply to.

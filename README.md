@@ -109,9 +109,15 @@ npm run skills:check      # verify no drift (used in tests, safe to run in CI)
 
 Rules encoded by the generator:
 
-- every name in `ALLOWLISTED_SKILLS` becomes a public `skills/<name>/SKILL.md` and
-  `commands/<name>.md`, **except** `masa-dual-core-personas`, which stays internal-only
-  (available to the adapter's hydration allowlist, not exposed as a public slash command)
+- every name in `ALLOWLISTED_SKILLS` becomes a public `skills/<name>/SKILL.md` and a
+  `commands/twin-sparrow-<name>.md`, **except** `masa-dual-core-personas`, which stays
+  internal-only (available to the adapter's hydration allowlist, not exposed as a public
+  slash command)
+- generated commands are always prefixed with `twin-sparrow-` so both surfaces Claude Code
+  auto-registers (bare `/twin-sparrow-<name>` and namespaced `/twin-sparrow:twin-sparrow-<name>`)
+  read as unambiguously ours in the slash-command picker — no bare `/<name>` entries that could
+  collide with other plugins or read as unqualified. Skills whose canonical name already
+  starts with `twin-sparrow-` are not double-prefixed
 - symlinked skill sources are resolved to real file content before being written, so the
   generated plugin package never ships a dangling symlink
 - generated command names may never collide with the reserved native commands

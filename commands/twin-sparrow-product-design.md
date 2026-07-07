@@ -3,14 +3,14 @@ description: "Western product-design discipline for stunning, high-production la
 argument-hint: "<task, question, or artifact to apply this skill to>"
 ---
 
-# /product-design
+# /twin-sparrow-product-design
 
 Apply the **product-design** skill from the Twin-Sparrow skill registry.
 
 ## Usage
 
 ```
-/product-design $ARGUMENTS
+/twin-sparrow-product-design $ARGUMENTS
 ```
 
 If arguments are given, treat them as the task, question, or artifact this skill should apply to.

@@ -3,14 +3,14 @@ description: "Enter deep-structure learning mode for books, PDFs, passages, theo
 argument-hint: "<task, question, or artifact to apply this skill to>"
 ---
 
-# /deep-structure-learning
+# /twin-sparrow-deep-structure-learning
 
 Apply the **deep-structure-learning** skill from the Twin-Sparrow skill registry.
 
 ## Usage
 
 ```
-/deep-structure-learning $ARGUMENTS
+/twin-sparrow-deep-structure-learning $ARGUMENTS
 ```
 
 If arguments are given, treat them as the task, question, or artifact this skill should apply to.

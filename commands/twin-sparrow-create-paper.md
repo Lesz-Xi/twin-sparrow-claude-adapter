@@ -3,14 +3,14 @@ description: "Create LaTeX research papers from Chief's literature research cont
 argument-hint: "<task, question, or artifact to apply this skill to>"
 ---
 
-# /create-paper
+# /twin-sparrow-create-paper
 
 Apply the **create-paper** skill from the Twin-Sparrow skill registry.
 
 ## Usage
 
 ```
-/create-paper $ARGUMENTS
+/twin-sparrow-create-paper $ARGUMENTS
 ```
 
 If arguments are given, treat them as the task, question, or artifact this skill should apply to.

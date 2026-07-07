@@ -3,14 +3,14 @@ description: "Use first-principles reasoning to decompose problems to fundamenta
 argument-hint: "<task, question, or artifact to apply this skill to>"
 ---
 
-# /first-principles-thinking
+# /twin-sparrow-first-principles-thinking
 
 Apply the **first-principles-thinking** skill from the Twin-Sparrow skill registry.
 
 ## Usage
 
 ```
-/first-principles-thinking $ARGUMENTS
+/twin-sparrow-first-principles-thinking $ARGUMENTS
 ```
 
 If arguments are given, treat them as the task, question, or artifact this skill should apply to.

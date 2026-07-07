@@ -3,14 +3,14 @@ description: "Composite architecture review skill combining Oppus reasoning disc
 argument-hint: "<task, question, or artifact to apply this skill to>"
 ---
 
-# /architect-review
+# /twin-sparrow-architect-review
 
 Apply the **architect-review** skill from the Twin-Sparrow skill registry.
 
 ## Usage
 
 ```
-/architect-review $ARGUMENTS
+/twin-sparrow-architect-review $ARGUMENTS
 ```
 
 If arguments are given, treat them as the task, question, or artifact this skill should apply to.

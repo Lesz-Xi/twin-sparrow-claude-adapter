@@ -3,14 +3,14 @@ description: "Enforce disciplined reasoning structure for research, architecture
 argument-hint: "<task, question, or artifact to apply this skill to>"
 ---
 
-# /oppus-reasoning-contract
+# /twin-sparrow-oppus-reasoning-contract
 
 Apply the **oppus-reasoning-contract** skill from the Twin-Sparrow skill registry.
 
 ## Usage
 
 ```
-/oppus-reasoning-contract $ARGUMENTS
+/twin-sparrow-oppus-reasoning-contract $ARGUMENTS
 ```
 
 If arguments are given, treat them as the task, question, or artifact this skill should apply to.

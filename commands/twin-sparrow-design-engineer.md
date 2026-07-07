@@ -3,14 +3,14 @@ description: "Composite design-engineering skill combining japanese-design and e
 argument-hint: "<task, question, or artifact to apply this skill to>"
 ---
 
-# /design-engineer
+# /twin-sparrow-design-engineer
 
 Apply the **design-engineer** skill from the Twin-Sparrow skill registry.
 
 ## Usage
 
 ```
-/design-engineer $ARGUMENTS
+/twin-sparrow-design-engineer $ARGUMENTS
 ```
 
 If arguments are given, treat them as the task, question, or artifact this skill should apply to.

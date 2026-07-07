@@ -3,14 +3,14 @@ description: "Dual-mode skill for creating novel explanatory frameworks. Scaffol
 argument-hint: "<task, question, or artifact to apply this skill to>"
 ---
 
-# /theory-creation
+# /twin-sparrow-theory-creation
 
 Apply the **theory-creation** skill from the Twin-Sparrow skill registry.
 
 ## Usage
 
 ```
-/theory-creation $ARGUMENTS
+/twin-sparrow-theory-creation $ARGUMENTS
 ```
 
 If arguments are given, treat them as the task, question, or artifact this skill should apply to.

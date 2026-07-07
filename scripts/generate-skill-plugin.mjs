@@ -33,6 +33,18 @@ const PLUGIN_EXCLUDED_SKILLS = new Set(["masa-dual-core-personas"]);
 // Native command files already owned by this repo (not skill-generated).
 const RESERVED_COMMAND_NAMES = new Set(["solaris", "atoman", "twin-status"]);
 
+// Every generated slash command is prefixed with this so both surfaces Claude
+// Code auto-registers (bare `/twin-sparrow-foo` and namespaced
+// `/twin-sparrow:twin-sparrow-foo`) read as unambiguously ours in the picker —
+// no bare `/foo` entries that could collide with other plugins or read as
+// unqualified. Skills whose canonical name already starts with the prefix are
+// not double-prefixed.
+const COMMAND_PREFIX = "twin-sparrow-";
+
+function toCommandName(skillName) {
+  return skillName.startsWith(COMMAND_PREFIX) ? skillName : `${COMMAND_PREFIX}${skillName}`;
+}
+
 async function loadRegistry() {
   const distPath = join(REPO_ROOT, "dist", "src", "skills", "skill-registry.js");
   if (!existsSync(distPath)) {
@@ -109,30 +121,30 @@ function yamlQuote(text) {
   return `"${text.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
 }
 
-function buildCommandMarkdown(name, description) {
-  const shortDescription = truncate(description ?? `Apply the ${name} skill.`, 200);
+function buildCommandMarkdown(commandName, skillName, description) {
+  const shortDescription = truncate(description ?? `Apply the ${skillName} skill.`, 200);
   return `---
 description: ${yamlQuote(shortDescription)}
 argument-hint: "<task, question, or artifact to apply this skill to>"
 ---
 
-# /${name}
+# /${commandName}
 
-Apply the **${name}** skill from the Twin-Sparrow skill registry.
+Apply the **${skillName}** skill from the Twin-Sparrow skill registry.
 
 ## Usage
 
 \`\`\`
-/${name} $ARGUMENTS
+/${commandName} $ARGUMENTS
 \`\`\`
 
 If arguments are given, treat them as the task, question, or artifact this skill should apply to.
-If no arguments are given, ask Chief what to apply ${name} to, or apply it to the most recent
+If no arguments are given, ask Chief what to apply ${skillName} to, or apply it to the most recent
 relevant context in this conversation.
 
 ## Skill Reference
 
-Full skill body: \`skills/${name}/SKILL.md\`
+Full skill body: \`skills/${skillName}/SKILL.md\`
 
 Load that skill file and follow its enforcement gate exactly before answering. Do not skip the
 gate because this command wrapper is short — the wrapper only routes to the skill, it does not
@@ -145,8 +157,9 @@ function computePlan(allowlistedSkills) {
   const publicSkills = allowlistedSkills.filter((name) => !PLUGIN_EXCLUDED_SKILLS.has(name));
 
   return publicSkills.map((name) => {
-    if (RESERVED_COMMAND_NAMES.has(name)) {
-      throw new Error(`skill name "${name}" collides with a reserved native command name`);
+    const commandName = toCommandName(name);
+    if (RESERVED_COMMAND_NAMES.has(commandName)) {
+      throw new Error(`generated command name "${commandName}" collides with a reserved native command name`);
     }
     const content = readResolvedSkillMarkdown(skillRoot, name);
     const { description } = parseFrontmatter(content);
@@ -155,10 +168,11 @@ function computePlan(allowlistedSkills) {
     }
     return {
       name,
+      commandName,
       skillMarkdownPath: join(SKILLS_OUT_DIR, name, "SKILL.md"),
       skillMarkdownContent: content,
-      commandMarkdownPath: join(COMMANDS_OUT_DIR, `${name}.md`),
-      commandMarkdownContent: buildCommandMarkdown(name, description),
+      commandMarkdownPath: join(COMMANDS_OUT_DIR, `${commandName}.md`),
+      commandMarkdownContent: buildCommandMarkdown(commandName, name, description),
     };
   });
 }
@@ -168,6 +182,23 @@ function readDirNames(dir) {
   return readdirSync(dir, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name);
+}
+
+function readFileNames(dir) {
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir, { withFileTypes: true })
+    .filter((entry) => entry.isFile())
+    .map((entry) => entry.name);
+}
+
+function staleCommandFiles(plan) {
+  const expected = new Set(plan.map((item) => `${item.commandName}.md`));
+  return readFileNames(COMMANDS_OUT_DIR).filter((entry) => {
+    if (!entry.endsWith(".md")) return false;
+    const base = entry.slice(0, -".md".length);
+    if (RESERVED_COMMAND_NAMES.has(base)) return false;
+    return !expected.has(entry);
+  });
 }
 
 function runCheck(plan) {
@@ -194,6 +225,10 @@ function runCheck(plan) {
     }
   }
 
+  for (const entry of staleCommandFiles(plan)) {
+    problems.push(`stale generated command file not in current allowlist: commands/${entry}`);
+  }
+
   if (problems.length > 0) {
     console.error("[generate-skill-plugin] drift detected between skill-registry.ts and the generated plugin surface:");
     for (const problem of problems) console.error(`  - ${problem}`);
@@ -211,6 +246,11 @@ function runWrite(plan) {
       rmSync(join(SKILLS_OUT_DIR, entry), { recursive: true, force: true });
       console.log(`[generate-skill-plugin] removed stale skill directory: skills/${entry}`);
     }
+  }
+
+  for (const entry of staleCommandFiles(plan)) {
+    rmSync(join(COMMANDS_OUT_DIR, entry), { force: true });
+    console.log(`[generate-skill-plugin] removed stale command file: commands/${entry}`);
   }
 
   for (const item of plan) {

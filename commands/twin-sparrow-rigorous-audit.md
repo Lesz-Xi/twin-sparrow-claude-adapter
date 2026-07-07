@@ -3,14 +3,14 @@ description: "Composite rigorous audit skill applying oppus-reasoning-contract i
 argument-hint: "<task, question, or artifact to apply this skill to>"
 ---
 
-# /rigorous-audit
+# /twin-sparrow-rigorous-audit
 
 Apply the **rigorous-audit** skill from the Twin-Sparrow skill registry.
 
 ## Usage
 
 ```
-/rigorous-audit $ARGUMENTS
+/twin-sparrow-rigorous-audit $ARGUMENTS
 ```
 
 If arguments are given, treat them as the task, question, or artifact this skill should apply to.

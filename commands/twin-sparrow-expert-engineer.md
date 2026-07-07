@@ -3,14 +3,14 @@ description: "Multi-domain engineering skill covering backend, frontend, TypeScr
 argument-hint: "<task, question, or artifact to apply this skill to>"
 ---
 
-# /expert-engineer
+# /twin-sparrow-expert-engineer
 
 Apply the **expert-engineer** skill from the Twin-Sparrow skill registry.
 
 ## Usage
 
 ```
-/expert-engineer $ARGUMENTS
+/twin-sparrow-expert-engineer $ARGUMENTS
 ```
 
 If arguments are given, treat them as the task, question, or artifact this skill should apply to.

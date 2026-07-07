@@ -3,14 +3,14 @@ description: "Sustained exploration mode for Chief's lifetime research. Use when
 argument-hint: "<task, question, or artifact to apply this skill to>"
 ---
 
-# /lifetime-research
+# /twin-sparrow-lifetime-research
 
 Apply the **lifetime-research** skill from the Twin-Sparrow skill registry.
 
 ## Usage
 
 ```
-/lifetime-research $ARGUMENTS
+/twin-sparrow-lifetime-research $ARGUMENTS
 ```
 
 If arguments are given, treat them as the task, question, or artifact this skill should apply to.
