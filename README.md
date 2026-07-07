@@ -39,7 +39,7 @@ Twin-Sparrow should feel present inside Claude while Claude receives only the sm
 | **Artifact review** | Approval-required gate for consequential actions |
 | **Token economics** | Estimates-only ledger — no unproven savings claims |
 | **Skill gates** | Fail-closed hydration of the allowlisted Twin-Sparrow skill inventory |
-| **Verification gate** | Blocks turn closure on unmet proof obligations until real pass evidence lands |
+| **Verification gate** | Blocks same-turn closure on unmet proof obligations; obligations close only when a runner-shaped verification command reports pass evidence |
 
 ## Current status
 
@@ -47,13 +47,13 @@ Initial runnable adapter skeleton implemented — the runtime plumbing and every
 
 - Claude plugin metadata manifest and `hooks/hooks.json`
 - `SessionStart` tiny Twin contract and `UserPromptSubmit` turn router
-- `PostToolUse` verification instrument and `Stop` verification gate — the retrospective
-  "catch" layer: obligations close only on unambiguous pass evidence, and closure is blocked
+- `PostToolBatch` verification instrument and `Stop` verification gate — the retrospective
+  "catch" layer: same-turn obligations close only on runner-shaped pass evidence, and closure is blocked
   until they do (loop-bounded — see [docs/VERIFICATION_GATE_HANDOFF.md](docs/VERIFICATION_GATE_HANDOFF.md))
 - safe JSON state store and append-only JSONL session ledger
-- the seven runtime capsules listed under [Capabilities](#capabilities-at-a-glance)
+- six runtime capsules from [Capabilities](#capabilities-at-a-glance); the verification gate is a Stop-hook/runtime catch layer, not a per-turn capsule
 - read-only `/twin-status` operator command target
-- Node test fixtures (51 passing), `docs/HONEST_NUMBERS.md`, and `docs/CLAUDE_SMOKE_TEST.md`
+- Node test fixtures (56 passing), `docs/HONEST_NUMBERS.md`, and `docs/CLAUDE_SMOKE_TEST.md`
 
 Verify locally:
 

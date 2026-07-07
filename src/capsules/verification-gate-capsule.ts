@@ -11,10 +11,78 @@ const CATEGORY_PATTERNS: ReadonlyArray<readonly [VerificationCategory, readonly 
   ["build", [/\bbuild\b/i]],
 ];
 
-/** Pure: category tag for a verification command or obligation text; null when it is not verification-shaped. */
+const TEST_RUNNERS = new Set(["test", "t", "vitest", "jest"]);
+const LINT_RUNNERS = new Set(["lint", "eslint", "biome"]);
+const TYPE_RUNNERS = new Set(["typecheck", "type-check", "types", "tsc"]);
+const BUILD_RUNNERS = new Set(["build"]);
+const PACKAGE_RUNNERS = new Set(["npm", "yarn", "pnpm", "bun"]);
+const ENV_ASSIGNMENT = /^[A-Za-z_][A-Za-z0-9_]*=/;
+
+function stripShellQuotes(value: string): string {
+  if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+    return value.slice(1, -1);
+  }
+  return value;
+}
+
+function tokenizeCommand(segment: string): readonly string[] {
+  const matches = segment.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g) ?? [];
+  return matches.map(stripShellQuotes);
+}
+
+function commandSegments(command: string): readonly string[] {
+  return command
+    .split(/\s*(?:&&|\|\||;)\s*/)
+    .map((segment) => segment.trim())
+    .filter(Boolean);
+}
+
+function categoryFromRunnerName(value: string | undefined): VerificationCategory | null {
+  if (!value) return null;
+  const normalized = value.toLowerCase();
+  if (TEST_RUNNERS.has(normalized) || normalized.includes("test")) return "test";
+  if (LINT_RUNNERS.has(normalized) || normalized.includes("lint")) return "lint";
+  if (TYPE_RUNNERS.has(normalized) || normalized.includes("typecheck") || normalized.includes("type-check")) return "type";
+  if (BUILD_RUNNERS.has(normalized)) return "build";
+  return null;
+}
+
+function categoryFromTokens(tokens: readonly string[]): VerificationCategory | null {
+  let index = 0;
+  while (ENV_ASSIGNMENT.test(tokens[index] ?? "")) index += 1;
+  const runner = tokens[index]?.toLowerCase();
+  if (!runner) return null;
+
+  if (PACKAGE_RUNNERS.has(runner)) {
+    const firstArg = tokens[index + 1]?.toLowerCase();
+    if (!firstArg) return null;
+    if (firstArg === "run" || firstArg === "run-script" || firstArg === "exec" || firstArg === "x") {
+      return categoryFromRunnerName(tokens[index + 2]);
+    }
+    return categoryFromRunnerName(firstArg);
+  }
+
+  if (runner === "npx") return categoryFromRunnerName(tokens[index + 1]);
+  if (runner === "make") return categoryFromRunnerName(tokens[index + 1]);
+  if (runner === "cargo") return categoryFromRunnerName(tokens[index + 1]);
+  if (runner === "go") return categoryFromRunnerName(tokens[index + 1]);
+  if (runner === "node" && tokens[index + 1] === "--test") return "test";
+  return categoryFromRunnerName(runner);
+}
+
+/** Pure: category tag for an obligation text; intentionally broad because human obligations are prose. */
 export function verificationCategory(text: string): VerificationCategory | null {
   for (const [category, patterns] of CATEGORY_PATTERNS) {
     if (patterns.some((pattern) => pattern.test(text))) return category;
+  }
+  return null;
+}
+
+/** Pure: category tag for an executed shell command; intentionally narrow to avoid false closes. */
+export function verificationCommandCategory(command: string): VerificationCategory | null {
+  for (const segment of commandSegments(command)) {
+    const category = categoryFromTokens(tokenizeCommand(segment));
+    if (category) return category;
   }
   return null;
 }

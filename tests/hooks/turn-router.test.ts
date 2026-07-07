@@ -36,6 +36,7 @@ test("UserPromptSubmit emits companion and working-state capsules", () => {
     statePath,
     now: "2026-07-06T00:01:00.000Z",
   });
+  assert.equal(result.outputJson.hookSpecificOutput.hookEventName, "UserPromptSubmit");
   assert.match(result.outputJson.hookSpecificOutput.additionalContext, /COMPANION CAPSULE/);
   assert.match(result.outputJson.hookSpecificOutput.additionalContext, /WORKING STATE CAPSULE/);
   assert.equal(result.state.companion.orientation, "atoman");
@@ -275,6 +276,20 @@ test("token-economics prompt emits estimates without savings claims", () => {
   const last = JSON.parse(ledger.at(-1) ?? "{}") as { details?: { capsuleMetrics?: { estimatesOnly?: boolean; claimedSavings?: boolean } } };
   assert.equal(last.details?.capsuleMetrics?.estimatesOnly, true);
   assert.equal(last.details?.capsuleMetrics?.claimedSavings, false);
+});
+
+test("everyday English plan/why/file words do not trigger surprise gates", () => {
+  const statePath = tempStatePath();
+  const planResult = handleUserPromptSubmit(userPromptSubmitFixture("let me plan the day"), { statePath, now: "2026-07-06T00:09:30.000Z" });
+  assert.equal(planResult.state.session.phase, "planning");
+  assert.deepEqual(planResult.state.artifacts.pendingReview, []);
+  assert.deepEqual(planResult.state.workingState.verification.required, []);
+
+  const whyResult = handleUserPromptSubmit(userPromptSubmitFixture("why does this fail?"), { statePath, now: "2026-07-06T00:09:40.000Z" });
+  assert.equal(whyResult.state.companion.orientation, "atoman");
+
+  const fileResult = handleUserPromptSubmit(userPromptSubmitFixture("this file thing feels weird"), { statePath, now: "2026-07-06T00:09:50.000Z" });
+  assert.equal(fileResult.state.sourceGrounding.required, false);
 });
 
 test("turn router persists JSON state", () => {

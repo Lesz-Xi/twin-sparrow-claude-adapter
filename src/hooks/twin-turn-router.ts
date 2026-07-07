@@ -23,6 +23,7 @@ export interface TurnRouterOptions {
 export interface TurnRouterResult {
   readonly outputJson: {
     readonly hookSpecificOutput: {
+      readonly hookEventName: "UserPromptSubmit";
       readonly additionalContext: string;
     };
   };
@@ -365,6 +366,7 @@ export function handleUserPromptSubmit(rawPayload: string, options: TurnRouterOp
   return {
     outputJson: {
       hookSpecificOutput: {
+        hookEventName: "UserPromptSubmit",
         additionalContext: bundle.additionalContext,
       },
     },

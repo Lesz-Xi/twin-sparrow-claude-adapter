@@ -25,15 +25,14 @@
         ]
       }
     ],
-    "PostToolUse": [
+    "PostToolBatch": [
       {
-        "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/dist/src/hooks/twin-posttooluse-instrument.js\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/dist/src/hooks/twin-posttoolbatch-instrument.js\"",
             "timeout": 5,
-            "statusMessage": "Twin-Sparrow verification instrument..."
+            "statusMessage": "Twin-Sparrow verification batch instrument..."
           }
         ]
       }

@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { renderSessionStartBundle } from "../capsules/capsule-bundle.js";
 import { TINY_TWIN_CONTRACT_CAPSULE_CLASS } from "../capsules/tiny-twin-contract.js";
@@ -7,6 +8,8 @@ import { readTwinAdapterState, resolveDefaultStatePath, writeTwinAdapterState } 
 export interface SessionStartOptions {
   readonly statePath?: string;
   readonly now?: string;
+  readonly sessionId?: string;
+  readonly arcId?: string;
 }
 
 export interface SessionStartResult {
@@ -18,9 +21,15 @@ export function handleSessionStart(options: SessionStartOptions = {}): SessionSt
   const statePath = options.statePath ?? resolveDefaultStatePath();
   const now = options.now ?? new Date().toISOString();
   const read = readTwinAdapterState(statePath);
+  const arcId = options.arcId ?? randomUUID();
   const state = {
     ...read.state,
     updatedAt: now,
+    session: {
+      ...read.state.session,
+      ...(options.sessionId ? { id: options.sessionId } : {}),
+      arcId,
+    },
     lastCapsuleClasses: [TINY_TWIN_CONTRACT_CAPSULE_CLASS],
   };
   const bundle = renderSessionStartBundle();
@@ -29,7 +38,7 @@ export function handleSessionStart(options: SessionStartOptions = {}): SessionSt
     {
       type: "session_start",
       at: now,
-      details: { capsuleClasses: state.lastCapsuleClasses, capsuleMetrics: bundle.metrics },
+      details: { sessionId: state.session.id, arcId, capsuleClasses: state.lastCapsuleClasses, capsuleMetrics: bundle.metrics },
     },
     resolveDefaultLedgerPath(statePath),
   );

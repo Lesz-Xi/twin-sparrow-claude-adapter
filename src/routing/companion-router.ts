@@ -38,8 +38,8 @@ const ACKNOWLEDGMENTS = new Set([
 
 const DISTRESS = [/\boverwhelm(?:ed|ing)?\b/i, /\bdistress(?:ed)?\b/i, /\banxious\b/i, /\bflood(?:ed|ing)?\b/i, /\bspiral(?:ing)?\b/i];
 const URGENCY = [/\burgent\b/i, /\basap\b/i, /\bright now\b/i, /\bimmediately\b/i, /\bship it\b/i, /\bdo it now\b/i];
-const SOLARIS = [/\bexplor(?:e|ing|ation)\b/i, /\bmeaning\b/i, /\bphilosoph(?:y|ical)\b/i, /\breflect(?:ion|ive)?\b/i, /\bunderstand\b/i, /\bwhy\b/i];
-const ATOMAN = [/\bimplement(?:ation|ing)?\b/i, /\bdebug(?:ging)?\b/i, /\bfix(?:ing|ed)?\b/i, /\bverify\b/i, /\btest(?:ing)?\b/i, /\bexecute\b/i, /\bconcrete\b/i];
+const SOLARIS = [/\bexplor(?:e|ing|ation)\b/i, /\bmeaning\b/i, /\bphilosoph(?:y|ical)\b/i, /\breflect(?:ion|ive)?\b/i, /\bunderstand\b/i, /\bwhy\b(?![^?!.]*\b(?:fail|fails|failed|failing|error|bug|debug|broken|exception)\b)/i];
+const ATOMAN = [/\bimplement(?:ation|ing)?\b/i, /\bdebug(?:ging)?\b/i, /\bfix(?:ing|ed)?\b/i, /\bverify\b/i, /\btest(?:ing)?\b/i, /\bfail(?:s|ed|ing)?\b/i, /\berror\b/i, /\bexecute\b/i, /\bconcrete\b/i];
 const NEW_ARC = [/\bnew (?:task|question|issue|topic|arc)\b/i, /\bsomething else\b/i, /\bswitch(?:ing)? gears\b/i, /\bunrelated\b/i];
 const CLOSURE = [/\bwe(?:'re| are) done\b/i, /\bdone for now\b/i, /\bwrap(?:ped)? up\b/i, /\bclose this\b/i, /\bwait for my next instruction\b/i];
 

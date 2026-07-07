@@ -5,6 +5,8 @@
 > **Provenance:** falls out of *Experiment 01 — Loop-Economics*
 > (`~/.twin-sparrow/agent/memory/Yt Transcribe/Naval & YC Combinator/Experiment-01-Loop-Economics/`).
 
+> **2026-07-07 supersession note:** This handoff is historical rationale. The live implementation now uses `PostToolBatch` for the verification instrument, documents Claude's `{ type, text }` hook response shape, emits `hookSpecificOutput.hookEventName`, rotates `arcId` on `SessionStart`, and keeps obligations same-turn rather than persistent across prompts.
+
 ---
 
 ## 1. Why this exists (one paragraph)

@@ -58,7 +58,7 @@ npm run test
 Expected local result:
 
 ```text
-51 tests passing
+56 tests passing
 0 failures
 ```
 
@@ -67,7 +67,7 @@ Build artifacts expected after test/build:
 ```text
 dist/src/hooks/twin-session-start.js
 dist/src/hooks/twin-turn-router.js
-dist/src/hooks/twin-posttooluse-instrument.js
+dist/src/hooks/twin-posttoolbatch-instrument.js
 dist/src/hooks/twin-verification-gate.js
 dist/src/commands/twin-status.js
 ```
@@ -136,6 +136,7 @@ echo '{"hookEventName":"UserPromptSubmit","prompt":"Implement the next phase"}' 
 Expected evidence:
 
 - stdout is JSON
+- JSON contains `hookSpecificOutput.hookEventName: "UserPromptSubmit"`
 - JSON contains `hookSpecificOutput.additionalContext`
 - additional context contains:
   - `TWIN-SPARROW COMPANION CAPSULE`
@@ -645,7 +646,7 @@ Notes:
 
 ### Test 11 — Verification gate blocks close until real pass evidence
 
-This validates the retrospective catch layer (`PostToolUse` instrument + `Stop` gate).
+This validates the retrospective catch layer (`PostToolBatch` instrument + `Stop` gate).
 
 Manual preflight (before live Claude):
 
@@ -656,9 +657,9 @@ echo '{"hookEventName":"Stop","stop_hook_active":false}' \
 # Expected: {"decision":"block","reason":"...proof obligations are unmet..."}
 # (Only when state phase is verifying/closing with open verification.required.)
 
-# 2. Feed the instrument unambiguous pass evidence for a test command:
-echo '{"hookEventName":"PostToolUse","tool_name":"Bash","tool_input":{"command":"npm test"},"tool_response":{"stdout":"ok","stderr":"","interrupted":false}}' \
-  | node dist/src/hooks/twin-posttooluse-instrument.js
+# 2. Feed the batch instrument unambiguous pass evidence for a test command:
+echo '{"hookEventName":"PostToolBatch","tool_responses":[{"tool_name":"Bash","tool_input":{"command":"npm test"},"tool_response":{"type":"text","text":"PASS tests/example.test.ts\nall checks passed"}}]}' \
+  | node dist/src/hooks/twin-posttoolbatch-instrument.js
 # Expected: state verification.completed now contains the test obligation;
 # ledger gains a verification_obligation_closed event.
 
@@ -677,7 +678,7 @@ Live sequence:
 Expected evidence:
 
 - Claude receives a Stop block naming the unmet obligation and continues working instead of closing.
-- After Claude runs a real passing `npm test`, the `PostToolUse` instrument writes `verification.completed` and the next Stop passes cleanly.
+- After Claude runs a real passing `npm test`, the `PostToolBatch` instrument writes `verification.completed` and the next Stop passes cleanly.
 - Ledger shows `verification_gate_block`, then `verification_obligation_closed`.
 - A failing test run instead logs `verification_caught_error` and the gate keeps blocking (up to the per-arc cap).
 

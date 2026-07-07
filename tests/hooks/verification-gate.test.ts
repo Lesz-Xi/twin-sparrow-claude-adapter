@@ -7,7 +7,7 @@ import { handleStop, MAX_BLOCKS_PER_ARC } from "../../src/hooks/twin-verificatio
 import { handlePostToolUse } from "../../src/hooks/twin-posttooluse-instrument.js";
 import { createDefaultState, type TaskArcPhase } from "../../src/state/schema.js";
 import { writeTwinAdapterState } from "../../src/state/safe-state-store.js";
-import { bashSuccessResponse, postToolUseBashFixture, stopHookFixture } from "../fixtures/claude-hook-events.js";
+import { documentedBashSuccessResponse, postToolUseBashFixture, stopHookFixture } from "../fixtures/claude-hook-events.js";
 
 function tempStatePath(): string {
   return join(mkdtempSync(join(tmpdir(), "twin-claude-gate-")), "state.json");
@@ -88,7 +88,7 @@ test("instrument pass evidence clears the gate within the same turn", () => {
   const blocked = handleStop(stopHookFixture(false), { statePath, now: "2026-07-06T01:07:00.000Z" });
   assert.equal(blocked.outputJson.decision, "block");
 
-  handlePostToolUse(postToolUseBashFixture("npm test", bashSuccessResponse), { statePath, now: "2026-07-06T01:08:00.000Z" });
+  handlePostToolUse(postToolUseBashFixture("npm test", documentedBashSuccessResponse), { statePath, now: "2026-07-06T01:08:00.000Z" });
 
   const cleared = handleStop(stopHookFixture(false), { statePath, now: "2026-07-06T01:09:00.000Z" });
   assert.deepEqual(cleared.outputJson, {});

@@ -57,6 +57,33 @@ export function postToolUseNonBashFixture(toolName: string): string {
   });
 }
 
+export function postToolBatchFixture(
+  observations: ReadonlyArray<{
+    readonly toolName: string;
+    readonly command?: string;
+    readonly response: unknown;
+  }>,
+): string {
+  return JSON.stringify({
+    hookEventName: "PostToolBatch",
+    tool_responses: observations.map((observation) => ({
+      tool_name: observation.toolName,
+      tool_input: observation.command ? { command: observation.command } : {},
+      tool_response: observation.response,
+    })),
+  });
+}
+
+export const documentedBashSuccessResponse = {
+  type: "text",
+  text: "PASS tests/hooks/posttooluse-instrument.test.ts\nall checks passed",
+} as const;
+
+export const documentedBashFailureResponse = {
+  type: "text",
+  text: "Error: Exit code 1\nFAIL tests/hooks/posttooluse-instrument.test.ts\n1 failing test",
+} as const;
+
 export const bashSuccessResponse = {
   stdout: "all checks passed",
   stderr: "",

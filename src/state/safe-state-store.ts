@@ -1,13 +1,20 @@
-import { existsSync, lstatSync, mkdirSync, readFileSync, renameSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, lstatSync, mkdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { createDefaultState, parseTwinAdapterState, type TwinAdapterState } from "./schema.js";
 
 export const MAX_STATE_BYTES = 64 * 1024;
+export const STATE_LOCK_TIMEOUT_MS = 250;
 
 export interface StateReadResult {
   readonly state: TwinAdapterState;
   readonly warnings: readonly string[];
+}
+
+interface LockResult {
+  readonly acquired: boolean;
+  readonly warnings: readonly string[];
+  readonly release: () => void;
 }
 
 export function resolveDefaultStatePath(env: NodeJS.ProcessEnv = process.env): string {
@@ -54,12 +61,68 @@ export function writeTwinAdapterState(state: TwinAdapterState, path: string = re
   renameSync(tempPath, path);
 }
 
+function sleepSync(milliseconds: number): void {
+  const signal = new Int32Array(new SharedArrayBuffer(4));
+  Atomics.wait(signal, 0, 0, milliseconds);
+}
+
+function lockErrorCode(error: unknown): string | null {
+  if (typeof error === "object" && error !== null && "code" in error) {
+    const code = (error as { readonly code?: unknown }).code;
+    return typeof code === "string" ? code : null;
+  }
+  return null;
+}
+
+function acquireStateLock(path: string, timeoutMs = STATE_LOCK_TIMEOUT_MS): LockResult {
+  const lockPath = `${path}.lock`;
+  mkdirSync(dirname(path), { recursive: true, mode: 0o700 });
+  const deadline = Date.now() + timeoutMs;
+
+  while (Date.now() <= deadline) {
+    try {
+      mkdirSync(lockPath, { mode: 0o700 });
+      let released = false;
+      return {
+        acquired: true,
+        warnings: [],
+        release: () => {
+          if (released) return;
+          released = true;
+          rmSync(lockPath, { recursive: true, force: true });
+        },
+      };
+    } catch (error) {
+      if (lockErrorCode(error) !== "EEXIST") {
+        const message = error instanceof Error ? error.message : String(error);
+        return {
+          acquired: false,
+          warnings: [`state lock unavailable; continuing without lock: ${message}`],
+          release: () => undefined,
+        };
+      }
+      sleepSync(10);
+    }
+  }
+
+  return {
+    acquired: false,
+    warnings: [`state lock timeout after ${timeoutMs}ms; continuing without lock`],
+    release: () => undefined,
+  };
+}
+
 export function updateTwinAdapterState(
   updater: (state: TwinAdapterState) => TwinAdapterState,
   path: string = resolveDefaultStatePath(),
 ): StateReadResult {
-  const read = readTwinAdapterState(path);
-  const updated = updater(read.state);
-  writeTwinAdapterState(updated, path);
-  return { state: updated, warnings: read.warnings };
+  const lock = acquireStateLock(path);
+  try {
+    const read = readTwinAdapterState(path);
+    const updated = updater(read.state);
+    writeTwinAdapterState(updated, path);
+    return { state: updated, warnings: [...lock.warnings, ...read.warnings] };
+  } finally {
+    lock.release();
+  }
 }
