@@ -5,25 +5,30 @@
 <h1 align="center">Twin-Sparrow Claude Adapter</h1>
 
 <p align="center">
-  Token-efficient Claude Code adapter for Twin-Sparrow —
-  one companion, two activations (<strong>Solaris</strong> &amp; <strong>Atoman</strong>).
+  Token-efficient agent adapter for Twin-Sparrow —
+  one companion, two activations (<strong>Solaris</strong> &amp; <strong>Atoman</strong>) —
+  running under Claude Code and Codex CLI from one host-neutral core.
 </p>
 
 ---
 
 ## Purpose
 
-This project lets Claude use Twin-Sparrow’s architecture **without replaying the full Twin-Sparrow doctrine, memory, skills, source context, and working state on every turn**.
+This project lets an agent CLI use Twin-Sparrow’s architecture **without replaying the full Twin-Sparrow doctrine, memory, skills, source context, and working state on every turn**.
 
 Instead of one heavy system prompt, each turn injects only the smallest faithful runtime slice needed:
 
 ```text
-Claude hook event
+Agent hook event (Claude Code or Codex CLI)
+→ host adapter normalizes the wire payload
 → local Twin adapter state
 → selected runtime capsules
 → compact additionalContext injection
 → state / token ledger update
 ```
+
+The hook I/O logic and the Twin-Sparrow capsule/state/routing core are split by a
+host port (`src/host/`) — see [Multi-host architecture](#multi-host-architecture-claude-code--codex-cli) below.
 
 ## Product soul
 
@@ -40,6 +45,7 @@ Twin-Sparrow should feel present inside Claude while Claude receives only the sm
 | **Token economics** | Estimates-only ledger — no unproven savings claims |
 | **Skill gates** | Fail-closed hydration of the allowlisted Twin-Sparrow skill inventory |
 | **Verification gate** | Blocks same-turn closure on unmet proof obligations; obligations close only when a runner-shaped verification command reports pass evidence |
+| **Multi-host core** | Hook I/O normalized behind a host port; the same compiled core runs under Claude Code and Codex CLI |
 
 ## Current status
 
@@ -47,13 +53,16 @@ Initial runnable adapter skeleton implemented — the runtime plumbing and every
 
 - Claude plugin metadata manifest and `hooks/hooks.json`
 - `SessionStart` tiny Twin contract and `UserPromptSubmit` turn router
-- `PostToolBatch` verification instrument and `Stop` verification gate — the retrospective
-  "catch" layer: same-turn obligations close only on runner-shaped pass evidence, and closure is blocked
-  until they do (loop-bounded — see [docs/VERIFICATION_GATE_HANDOFF.md](docs/VERIFICATION_GATE_HANDOFF.md))
+- `PostToolBatch` (Claude) / `PostToolUse` (Codex) verification instrument and `Stop` verification gate —
+  the retrospective "catch" layer: same-turn obligations close only on runner-shaped pass evidence, and
+  closure is blocked until they do (loop-bounded — see [docs/VERIFICATION_GATE_HANDOFF.md](docs/VERIFICATION_GATE_HANDOFF.md))
+- `src/host/` — a host port (`AgentHostPort`) that normalizes hook payloads and output rendering;
+  `claudeHost` and `codexHost` are both thin instances of the shared hooks.json-contract implementation
+  (see [Multi-host architecture](#multi-host-architecture-claude-code--codex-cli))
 - safe JSON state store and append-only JSONL session ledger
 - six runtime capsules from [Capabilities](#capabilities-at-a-glance); the verification gate is a Stop-hook/runtime catch layer, not a per-turn capsule
 - read-only `/twin-status` operator command target
-- Node test fixtures (56 passing), `docs/HONEST_NUMBERS.md`, and `docs/CLAUDE_SMOKE_TEST.md`
+- Node test fixtures (71 passing), `docs/HONEST_NUMBERS.md`, and `docs/CLAUDE_SMOKE_TEST.md`
 
 Verify locally:
 
@@ -61,8 +70,41 @@ Verify locally:
 npm run test
 ```
 
-> New or changed hooks in `hooks/hooks.json` are only read when Claude Desktop / Claude Code
-> loads the plugin — restart after pulling changes that touch hook wiring.
+> New or changed hooks in `hooks/hooks.json` (or `codex/hooks.json`) are only read when the host
+> app loads the plugin/hook config — restart Claude Code/Desktop or Codex CLI after pulling changes
+> that touch hook wiring.
+
+## Multi-host architecture (Claude Code + Codex CLI)
+
+Twin-Sparrow's capsules, state, and routing logic are host-neutral (`src/capsules/`,
+`src/routing/`, `src/state/`, `src/skills/`). Only the hook wire format — how a payload
+arrives on stdin and how context/decisions are rendered back — is host-specific, and that
+seam is isolated in `src/host/`:
+
+- **`src/host/host-port.ts`** — the `AgentHostPort` interface every host implements
+  (parse payload, extract prompt/Bash-observations/Stop-signal, render context/decision).
+- **`src/host/hooks-json-host.ts`** — the shared implementation of the `hooks.json` contract
+  (JSON on stdin, `{hookSpecificOutput.additionalContext}` / `{decision:"block",reason}` on stdout)
+  that Claude Code and Codex CLI both use.
+- **`src/host/claude-host.ts`** / **`src/host/codex-host.ts`** — thin instances of that shared
+  implementation. Neither forks the parser; a host only overrides a method if its wire format
+  genuinely diverges.
+- **`src/host/index.ts`** — `resolveHost()` picks the host via `TWIN_SPARROW_HOST` (`claude` default,
+  `codex` selects the Codex host; an unknown value falls back to Claude rather than failing silently).
+
+**Claude Code** wiring is `hooks/hooks.json` (as documented above). **Codex CLI** wiring lives in
+[`codex/`](codex/) — see [codex/README.md](codex/README.md) for setup (enabling `codex_hooks`,
+pointing `TWIN_SPARROW_ADAPTER_ROOT` at this repo, merging `codex/hooks.json` into
+`~/.codex/hooks.json`, and installing `codex/AGENTS.md`'s tiny contract). Codex has no
+`PostToolBatch` event, so its verification instrument runs per-tool on `PostToolUse` instead.
+
+**Open verification**: the wire *shapes* Claude Code and Codex CLI use for `SessionStart`,
+`UserPromptSubmit`, `PostToolUse`, and `Stop` are confirmed identical from both hosts' own
+documentation and a live `~/.codex/hooks.json`. The one unconfirmed detail is the inner shape of
+Codex's Bash `tool_response` payload — `classifyToolResponse` already tolerates every shape seen
+across both hosts, but that tolerance hasn't been checked against a live Codex capture yet. See
+[codex/README.md](codex/README.md#open-verification-do-before-trusting-obligation-closing) before
+relying on the verification gate under Codex.
 
 ## Claude Desktop MCP launcher
 
@@ -136,11 +178,13 @@ versioned plugin cache. A restart alone may keep serving the old cached version.
 
 1. Run the live Claude smoke test from `docs/CLAUDE_SMOKE_TEST.md`, including Test 11
    (verification gate catch layer).
-2. Record pass/fail evidence without claiming token savings.
-3. Fix any hook/manifest/command wiring issues discovered live.
-4. Export a real catch-rate metric from the ledger (`verification_gate_block` /
+2. Capture a real Codex CLI `PostToolUse` payload and confirm the Bash `tool_response`
+   shape against `classifyToolResponse` (see [Multi-host architecture](#multi-host-architecture-claude-code--codex-cli)).
+3. Record pass/fail evidence without claiming token savings.
+4. Fix any hook/manifest/command wiring issues discovered live, on either host.
+5. Export a real catch-rate metric from the ledger (`verification_gate_block` /
    `verification_caught_error`) once live data exists.
-5. Prepare a repo-extraction checklist after live validation.
+6. Prepare a repo-extraction checklist after live validation.
 
 ## Boundary
 

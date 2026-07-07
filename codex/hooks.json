@@ -1,0 +1,50 @@
+{
+  "description": "Twin-Sparrow runtime capsule hooks for Codex CLI. Requires codex_hooks = true and TWIN_SPARROW_ADAPTER_ROOT pointing at this repo (see codex/README.md). Codex has no PostToolBatch event, so the verification instrument runs per-tool on PostToolUse.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "TWIN_SPARROW_HOST=codex node \"${TWIN_SPARROW_ADAPTER_ROOT}/dist/src/hooks/twin-session-start.js\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "TWIN_SPARROW_HOST=codex node \"${TWIN_SPARROW_ADAPTER_ROOT}/dist/src/hooks/twin-turn-router.js\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "^Bash$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "TWIN_SPARROW_HOST=codex node \"${TWIN_SPARROW_ADAPTER_ROOT}/dist/src/hooks/twin-posttooluse-instrument.js\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "TWIN_SPARROW_HOST=codex node \"${TWIN_SPARROW_ADAPTER_ROOT}/dist/src/hooks/twin-verification-gate.js\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

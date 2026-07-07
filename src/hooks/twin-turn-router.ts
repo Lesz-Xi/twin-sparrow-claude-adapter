@@ -9,6 +9,7 @@ import { TOKEN_ECONOMICS_CAPSULE_CLASS } from "../capsules/token-economics-capsu
 import { WORKING_STATE_CAPSULE_CLASS } from "../capsules/working-state-capsule.js";
 import { classifyPrompt, requiresSourceGrounding, type PromptClassification } from "../routing/prompt-classifier.js";
 import { applyCompanionDecision, routeCompanion, type CompanionRoutingDecision } from "../routing/companion-router.js";
+import { resolveHost } from "../host/index.js";
 import { hydrateSkillBody } from "../skills/skill-registry.js";
 import { appendLedgerEvent, resolveDefaultLedgerPath } from "../state/ledger.js";
 import { readTwinAdapterState, resolveDefaultStatePath, writeTwinAdapterState } from "../state/safe-state-store.js";
@@ -33,43 +34,6 @@ export interface TurnRouterResult {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function nestedString(record: Record<string, unknown>, key: string): string | null {
-  const value = record[key];
-  if (typeof value === "string") return value;
-  if (isRecord(value)) {
-    const text = value.text;
-    if (typeof text === "string") return text;
-  }
-  return null;
-}
-
-export function extractPromptText(payload: unknown): string {
-  if (typeof payload === "string") return payload;
-  if (!isRecord(payload)) return "";
-  for (const key of ["prompt", "userPrompt", "message", "text", "input"] as const) {
-    const value = nestedString(payload, key);
-    if (value) return value;
-  }
-  const hookInput = payload.hookInput;
-  if (isRecord(hookInput)) {
-    for (const key of ["prompt", "userPrompt", "message", "text", "input"] as const) {
-      const value = nestedString(hookInput, key);
-      if (value) return value;
-    }
-  }
-  return "";
-}
-
-function parsePayload(raw: string): unknown {
-  const trimmed = raw.trim();
-  if (!trimmed) return {};
-  try {
-    return JSON.parse(trimmed) as unknown;
-  } catch {
-    return trimmed;
-  }
 }
 
 interface CompanionSlashCommand {
@@ -287,8 +251,9 @@ function buildVerification(labels: readonly PromptClassification[], sourceRequir
 export function handleUserPromptSubmit(rawPayload: string, options: TurnRouterOptions = {}): TurnRouterResult {
   const statePath = options.statePath ?? resolveDefaultStatePath();
   const now = options.now ?? new Date().toISOString();
-  const payload = parsePayload(rawPayload);
-  const promptText = extractPromptText(payload);
+  const host = resolveHost();
+  const payload = host.parsePayload(rawPayload);
+  const promptText = host.extractPrompt(payload);
   const companionCommand = parseCompanionSlashCommand(promptText);
   const routedPromptText = effectivePromptText(promptText, companionCommand);
   const labels = classifyPrompt(routedPromptText);
@@ -364,12 +329,7 @@ export function handleUserPromptSubmit(rawPayload: string, options: TurnRouterOp
   );
 
   return {
-    outputJson: {
-      hookSpecificOutput: {
-        hookEventName: "UserPromptSubmit",
-        additionalContext: bundle.additionalContext,
-      },
-    },
+    outputJson: host.renderContext("UserPromptSubmit", bundle.additionalContext),
     state: updated,
     warnings: read.warnings,
   };
