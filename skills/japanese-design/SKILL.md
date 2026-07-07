@@ -53,6 +53,8 @@ Ask:
 
 Use `/think-different` first when the real issue is product soul, narrative spine, category collapse, feature-stack bloat, or deciding what the page is. Use `japanese-design` to make that representation visible through atmosphere, structure, type, spacing, motion, and implementation discipline.
 
+Use `web-design` below this skill for craft execution: layout grids, motion tokens, reveal techniques, and page assembly. The hierarchy is representation (`think-different`) → function (`product-design`) → surface (`japanese-design`) → craft (`web-design`). This skill decides surface doctrine; `web-design` implements it and never overrides it.
+
 Do not apply Japanese-design polish before the representation is clear.
 
 ## Japanese-Adjacent Principles

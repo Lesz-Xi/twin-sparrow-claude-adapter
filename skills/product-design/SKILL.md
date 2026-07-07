@@ -21,6 +21,7 @@ This skill is a sibling, not a replacement.
 - `think-different` → representation. What is this page really? (run first when the concept is ambiguous)
 - `product-design` → function. What must the page communicate, prove, and make the user do?
 - `japanese-design` → surface. How does it feel: ma, shibui, wabi-sabi, typography, motion, material.
+- `web-design` → craft. How the page is built: grid systems, motion engineering, reveal techniques, and page assembly. It executes this skill's structure and japanese-design's surface; it never reorders the value spine or demotes the primary action.
 
 ### Composition rule (load-bearing)
 

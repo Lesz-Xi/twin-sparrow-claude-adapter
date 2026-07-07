@@ -29,6 +29,7 @@ export const ALLOWLISTED_SKILLS = [
   "twin-sparrow-apps",
   "twin-sparrow-computer-use",
   "twin-sparrow-taste",
+  "web-design",
   "work-backward",
   "youtube-transcript",
 ] as const;

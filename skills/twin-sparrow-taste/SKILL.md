@@ -65,6 +65,7 @@ Use these when the task touches visual language, layout, motion, atmosphere, or 
 - `japanese-design` for Visual Doctrine, ma, shibui, materiality, typography, motion restraint, and Aura system grammar
 - `product-design` for functional page/product hierarchy, promise → proof → mechanism → action
 - `think-different` for product soul, category collapse, cuts, and user-visible transformation
+- `web-design` for craft execution: layout systems, motion tokens, reveal/masking, and page assembly — the bottom of the hierarchy (representation → function → surface → craft); it implements the layers above and never overrides them
 
 Compact doctrine:
 

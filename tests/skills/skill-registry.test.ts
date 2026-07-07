@@ -39,6 +39,7 @@ test("allowlisted skills include the Twin-Sparrow local skill inventory", () => 
     "twin-sparrow-apps",
     "twin-sparrow-computer-use",
     "twin-sparrow-taste",
+    "web-design",
     "work-backward",
     "youtube-transcript",
   ];
