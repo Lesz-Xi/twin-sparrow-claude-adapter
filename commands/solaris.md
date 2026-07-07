@@ -5,7 +5,7 @@ argument-hint: "<optional message to answer as Solaris>"
 
 # /solaris
 
-Set the Twin-Sparrow Claude Adapter companion orientation to Solaris for the current arc or next turn.
+Set the Twin-Sparrow Agent Adapter companion orientation to Solaris for the current arc or next turn.
 
 Solaris leads reflective, exploratory, distressed, philosophical, or meaning-first work.
 

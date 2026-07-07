@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="assets/cover.png" alt="Twin-Sparrow Claude Adapter" width="100%">
+  <img src="assets/cover.png" alt="Twin-Sparrow Agent Adapter" width="100%">
 </p>
 
-<h1 align="center">Twin-Sparrow Claude Adapter</h1>
+<h1 align="center">Twin-Sparrow Agent Adapter</h1>
 
 <p align="center">
   Token-efficient agent adapter for Twin-Sparrow —

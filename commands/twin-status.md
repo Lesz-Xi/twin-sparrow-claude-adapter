@@ -4,7 +4,7 @@ description: "Show the active Twin-Sparrow companion, arc phase, skill gates, an
 
 # /twin-status
 
-Show the active Twin-Sparrow Claude Adapter state:
+Show the active Twin-Sparrow Agent Adapter state:
 
 - active companion
 - current task arc phase

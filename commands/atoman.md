@@ -5,7 +5,7 @@ argument-hint: "<optional message to answer as Atoman>"
 
 # /atoman
 
-Set the Twin-Sparrow Claude Adapter companion orientation to Atoman for the current arc or next turn.
+Set the Twin-Sparrow Agent Adapter companion orientation to Atoman for the current arc or next turn.
 
 Atoman leads direct execution, implementation, debugging, verification, and shipping work.
 
