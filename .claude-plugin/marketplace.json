@@ -4,14 +4,14 @@
     "name": "Lesz-Xi"
   },
   "metadata": {
-    "description": "Local marketplace exposing the twin-sparrow Claude Code plugin (companion continuity, capsules, and Twin-Sparrow skill surface).",
-    "version": "0.0.1"
+    "description": "Marketplace exposing the twin-sparrow runtime capsule adapter (companion continuity, capsules, verification gate, and Twin-Sparrow skill surface) for Claude Code and Codex CLI.",
+    "version": "0.0.2"
   },
   "plugins": [
     {
       "name": "twin-sparrow",
-      "description": "Token-efficient Twin-Sparrow runtime capsule adapter for Claude Code.",
-      "version": "0.0.1",
+      "description": "Token-efficient Twin-Sparrow runtime capsule adapter for Claude Code and Codex CLI.",
+      "version": "0.0.2",
       "author": {
         "name": "Lesz-Xi"
       },
