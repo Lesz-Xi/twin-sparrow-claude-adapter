@@ -103,6 +103,10 @@ Structure is shown with hairlines, not chrome:
   page. Rectangular and precise; radius only where material logic demands it.
 - **One framing motif per page.** Container lines, corner squares, framed grid, or
   L-brackets — pick one. Stacking framing systems turns structure into HUD ornament.
+- A single, non-repeating instrument-like mark (a scroll-progress ring, a brand glyph) is
+  compatible with one framing motif per page and instrument-not-dashboard, provided it
+  appears exactly once and signals something real (state, progress) or serves as a
+  minimal brand anchor — never a decorative icon system repeated across the page.
 - Text clears frame lines through generous gutters. Copy never touches a rule.
 
 ### Split and image-first patterns
@@ -129,6 +133,34 @@ Gothic New, Klee One as sparse accent). This skill executes scale and rhythm.
   adjacent grid columns where they clarify hierarchy, omitted where they do not.
 - Serif index structures (drop caps, marginalia, two-zone reading shells) only when the
   page is genuinely archival or editorial; never as costume.
+- Data numeral / stat block: an oversized, thin-weight numeral carrying a real data value
+  (a count, a measurement, a date), paired with a tiny tracked-out uppercase label
+  beneath it, optionally grouped under a hairline top rule with sibling stats. Distinct
+  from `number-details`'s small sequence markers, which ban exactly this as decoration —
+  "oversized ghost numerals as background art" and "giant background numerals, ghost
+  digits, watermark indices." The rule that legitimizes this pattern instead: the
+  numeral must carry a real, specific value with a real label; a decorative or
+  contentless oversized numeral stays banned.
+
+```css
+.stat-block {
+  display: grid;
+  gap: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line-color);
+}
+.stat-value {
+  font-weight: 200;
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.stat-label {
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+```
 - Line length, wrap points, and heading breaks are checked after fonts load; reveal
   splitting initializes after `document.fonts.ready` when line integrity matters.
 
@@ -238,13 +270,89 @@ contrast decision.
 
 ### Surfaces
 
-- Warm paper and stone neutrals over stark white; layered low-contrast surfaces over
-  elevation stacks. Tonal shifts and hairlines separate planes.
+- Two admitted default directions, chosen by the page's material logic, not by
+  warm-first habit: warm paper and stone neutrals, or cool-neutral charcoal and
+  near-black — either over stark white; layered low-contrast surfaces over elevation
+  stacks. Tonal shifts and hairlines separate planes.
 - Texture must read as material truth (wabi-sabi), not effect: diagonal line texture and
   grain stay below ~0.05 opacity and survive close inspection as surface tension only.
-- Monochrome ordered-dither fields are the admitted atmospheric texture: near-black or
+- Monochrome ordered-dither fields are one admitted atmospheric texture: near-black or
   paper monochrome, static by default; drift must be earned by the page's purpose and
   never sits behind reading-dense content.
+- Grain atmosphere is the second admitted atmospheric texture, sibling to dither: fine,
+  continuous, near-per-pixel noise (film grain, not Bayer cells) for pages that want an
+  archival/photographic material feel rather than dither's instrument/graphic feel.
+  Monochrome only, static by default under the same earned-drift discipline as dither;
+  opacity stays under the same ~0.05 ceiling as the grain rule above, and it never sits
+  behind reading-dense content. Distinction rule: dither is macro Bayer cells for an
+  instrument/graphic feel, grain is fine noise for an archival/photographic material
+  feel — pick one texture per page, never both. Grounded in japanese-design's wabi-sabi
+  rule: "Let age, texture, grain, asymmetry, patina, and imperfect material evidence
+  remain visible where appropriate."
+
+```css
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  opacity: 0.035; /* ceiling — material texture, never noise-as-decoration */
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>") repeat;
+}
+```
+
+Static by default — the SVG filter paints once, no RAF loop needed. If drift is earned
+by the page's purpose, generate the field on canvas following dither-background's
+`animate`-flag shape (opt-in, `prefers-reduced-motion` always wins) rather than a second,
+independent motion system.
+
+### Hero photograph wash (optional, one instance per page)
+
+Rule: at most one static, art-directed, soft-focus photograph (or equivalent authored
+image) may sit behind the transparent top nav, confined to the first viewport, fading to
+the flat monochrome or grain surface before the fold via the alpha-masking fade technique
+from Reveal & Masking. It never recurs elsewhere on the page, never drifts or animates,
+and carries no glow/bloom accumulation — it is a photograph, not a light effect.
+
+This is a named, optional pattern, not a default reach: apply it only when the page's
+material logic calls for one atmospheric photographic moment — the same "drift must be
+earned" discipline that governs dither and grain, applied to imagery instead of noise.
+
+Mechanism distinction (do not conflate):
+- Not `atmosphere-background` — that pattern is synthetic, shader/canvas-driven,
+  animated, and screen-blended to manufacture a glow. This pattern is a single static
+  authored photograph: no procedural generation, no loop, no luminosity accumulation.
+- Not `progressive-blur` — that pattern stacks live `backdrop-filter` blur over
+  interactive content as UI chrome. This pattern is a pre-blurred, static image used as
+  hero material, not a scrim over content.
+- Not the Layout Systems image-first rule ("legibility via honest solid scrims or
+  placement, not blur washes") — that rule bans faking text contrast by blurring a sharp
+  photo behind copy. This pattern is the photograph's own authored softness as its
+  aesthetic value, with no copy overlapping the blurred region.
+
+Doctrinal grounding: `atmosphere-background`'s and `mesh-gradient-dark-blue-clean`'s own
+Restrained Alternative sections already name "honest photography/real product imagery in
+the hero, structured by hairlines" as the sanctioned quiet alternative to their rejected
+synthetic effects — this pattern gives that alternative a name and a spec; it is not a
+new exception invented from nothing.
+
+```css
+.hero-wash {
+  position: absolute;
+  inset: 0;
+  height: 100vh;
+  background: center / cover no-repeat url("/hero-wash.jpg");
+  filter: blur(18px) saturate(0); /* pre-authored, soft-focus, monochrome */
+  mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 100%);
+  pointer-events: none;
+}
+.site-nav {
+  position: relative;
+  z-index: 1;
+  background: transparent;
+}
+```
 
 ### Shadow policy
 
