@@ -18,7 +18,6 @@ test("allowlisted skills include the Twin-Sparrow local skill inventory", () => 
     "architect-review",
     "code-quality-skill",
     "create-paper",
-    "crucible-doctrine",
     "deep-audit",
     "deep-structure-learning",
     "design-engineer",

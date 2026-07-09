@@ -8,7 +8,6 @@ export const ALLOWLISTED_SKILLS = [
   "architect-review",
   "code-quality-skill",
   "create-paper",
-  "crucible-doctrine",
   "deep-audit",
   "deep-structure-learning",
   "design-engineer",
