@@ -25,6 +25,7 @@ test("allowlisted skills include the Twin-Sparrow local skill inventory", () => 
     "expert-engineer",
     "expert-review",
     "first-principles-thinking",
+    "grounded-writing",
     "japanese-design",
     "lifetime-research",
     "literature-arxiv",

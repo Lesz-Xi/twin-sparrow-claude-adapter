@@ -15,6 +15,7 @@ export const ALLOWLISTED_SKILLS = [
   "expert-engineer",
   "expert-review",
   "first-principles-thinking",
+  "grounded-writing",
   "japanese-design",
   "lifetime-research",
   "literature-arxiv",
