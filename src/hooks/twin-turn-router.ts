@@ -13,7 +13,7 @@ import { resolveHost } from "../host/index.js";
 import { hydrateSkillBody } from "../skills/skill-registry.js";
 import { appendLedgerEvent, resolveDefaultLedgerPath } from "../state/ledger.js";
 import { readTwinAdapterState, resolveDefaultStatePath, writeTwinAdapterState } from "../state/safe-state-store.js";
-import type { ArtifactPointer, ArtifactType, CompanionOrientation, SourceGroundingMode, SourcePointer, SourceStatus, TwinAdapterState, WorkingStateActiveFile } from "../state/schema.js";
+import { createVerificationState, type ArtifactPointer, type ArtifactType, type CompanionOrientation, type SourceGroundingMode, type SourcePointer, type SourceStatus, type TwinAdapterState, type WorkingStateActiveFile } from "../state/schema.js";
 
 export interface TurnRouterOptions {
   readonly statePath?: string;
@@ -240,12 +240,12 @@ function buildPendingActions(activeSkills: readonly string[], sourceRequired: bo
   return actions;
 }
 
-function buildVerification(labels: readonly PromptClassification[], sourceRequired: boolean, artifactCount: number): TwinAdapterState["workingState"]["verification"] {
+function buildVerification(labels: readonly PromptClassification[], sourceRequired: boolean, artifactCount: number, now: string): TwinAdapterState["workingState"]["verification"] {
   const required: string[] = [];
   if (labels.includes("implementation")) required.push("Run local tests after code changes.");
   if (sourceRequired) required.push("Verify source text is admitted before grounded claims.");
   if (labels.includes("artifact-evaluation") || artifactCount > 0) required.push("Confirm artifact path and approval state before action.");
-  return { required, completed: [] };
+  return createVerificationState({ required, now });
 }
 
 export function handleUserPromptSubmit(rawPayload: string, options: TurnRouterOptions = {}): TurnRouterResult {
@@ -298,7 +298,7 @@ export function handleUserPromptSubmit(rawPayload: string, options: TurnRouterOp
       activeFiles: deriveActiveFiles(routedPromptText, labels, routed.workingState.activeFiles),
       establishedFacts: buildEstablishedFacts(labels, activeSkills, sourceRequired, pendingReview.length, companionCommand),
       pendingActions: buildPendingActions(activeSkills, sourceRequired, pendingReview.length, companionCommand),
-      verification: buildVerification(labels, sourceRequired, pendingReview.length),
+      verification: buildVerification(labels, sourceRequired, pendingReview.length, now),
       nextStep: activeSkills.length > 0 ? "Apply active skill gate with compact capsule." : artifactReviewRequired ? "Evaluate artifact and keep approval gate visible." : sourceRequired ? "Acquire or verify source text before grounded answer." : "Answer with compact Twin-Sparrow runtime context.",
     },
     artifacts: {

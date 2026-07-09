@@ -2,6 +2,7 @@ import { stdin as input } from "node:process";
 import { fileURLToPath } from "node:url";
 import { readTwinAdapterState, resolveDefaultStatePath } from "../state/safe-state-store.js";
 import type { TwinAdapterState } from "../state/schema.js";
+import { formatVerificationSummary } from "../state/verification-format.js";
 
 export interface TwinStatusOptions {
   readonly statePath?: string;
@@ -45,6 +46,7 @@ export function renderTwinStatus(state: TwinAdapterState, warnings: readonly str
     `Skill hydration: ${formatList(hydration, "none")}`,
     `Source grounding: ${state.sourceGrounding.mode}${state.sourceGrounding.required ? " / required" : " / not required"}`,
     `Sources: ${formatList(sources, "none")}`,
+    ...formatVerificationSummary(state.workingState.verification),
     `Pending artifact reviews: ${pendingArtifacts}`,
     `Last capsule classes: ${capsuleClasses}`,
     `Warnings: ${formatList(warnings, "none")}`,

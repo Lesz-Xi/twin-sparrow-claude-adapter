@@ -1,13 +1,14 @@
 # Claude Live Smoke Test — Twin-Sparrow Claude Adapter
 
 Date: 2026-07-06  
+Updated: 2026-07-09
 Status: **unvalidated in live Claude**
 
 ## Purpose
 
 This document defines the first live Claude validation protocol for the Twin-Sparrow Claude Adapter.
 
-Local TypeScript behavior is test-covered. Live Claude behavior is not yet proven.
+Local TypeScript behavior is test-covered. Live Claude behavior is not yet proven. The cross-host claim boundary and pass/fail matrix live in [LIVE_HOOK_VALIDATION.md](LIVE_HOOK_VALIDATION.md).
 
 The smoke test must answer four questions:
 
@@ -55,11 +56,12 @@ cd /Users/lesz/Developer/Twin-Sparrow/twin-sparrow-claude-adapter
 npm run test
 ```
 
-Expected local result:
+Expected local result at the current architecture slice:
 
 ```text
-56 tests passing
-0 failures
+# tests 79
+# pass 79
+# fail 0
 ```
 
 Build artifacts expected after test/build:
@@ -646,41 +648,64 @@ Notes:
 
 ### Test 11 — Verification gate blocks close until real pass evidence
 
-This validates the retrospective catch layer (`PostToolBatch` instrument + `Stop` gate).
+This validates the retrospective catch layer (`PostToolBatch` instrument + `Stop` gate), now represented as structured obligations/evidence plus mutation sequencing.
 
 Manual preflight (before live Claude):
 
 ```bash
-# 1. Seed a closing-phase state with an open test obligation, then ask the gate:
+# Use an isolated state path.
+export TWIN_SPARROW_CLAUDE_STATE="/tmp/twin-sparrow-claude-smoke/state.json"
+rm -rf "$(dirname "$TWIN_SPARROW_CLAUDE_STATE")"
+mkdir -p "$(dirname "$TWIN_SPARROW_CLAUDE_STATE")"
+
+# 1. Open an implementation obligation through the real prompt hook.
+echo '{"hookEventName":"UserPromptSubmit","prompt":"Implement a small code change"}' \
+  | node dist/src/hooks/twin-turn-router.js >/tmp/twin-turn-out.json
+
+# 2. Ask the Stop gate before any verification evidence.
 echo '{"hookEventName":"Stop","stop_hook_active":false}' \
   | node dist/src/hooks/twin-verification-gate.js
-# Expected: {"decision":"block","reason":"...proof obligations are unmet..."}
-# (Only when state phase is verifying/closing with open verification.required.)
+# Expected: {"decision":"block","reason":"...Run local tests after code changes..."}
 
-# 2. Feed the batch instrument unambiguous pass evidence for a test command:
+# 3. Feed the batch instrument unambiguous pass evidence for a test command.
 echo '{"hookEventName":"PostToolBatch","tool_responses":[{"tool_name":"Bash","tool_input":{"command":"npm test"},"tool_response":{"type":"text","text":"PASS tests/example.test.ts\nall checks passed"}}]}' \
   | node dist/src/hooks/twin-posttoolbatch-instrument.js
-# Expected: state verification.completed now contains the test obligation;
+# Expected: structured evidence appended; obligation status becomes closed;
 # ledger gains a verification_obligation_closed event.
 
-# 3. Re-ask the gate:
+# 4. Re-ask the gate.
 echo '{"hookEventName":"Stop","stop_hook_active":false}' \
   | node dist/src/hooks/twin-verification-gate.js
 # Expected: {} — clean close.
+
+# 5. Simulate a later mutation.
+echo '{"hookEventName":"PostToolBatch","tool_responses":[{"tool_name":"Edit","tool_input":{"file_path":"/tmp/example.ts"},"tool_response":{"success":true}}]}' \
+  | node dist/src/hooks/twin-posttoolbatch-instrument.js
+# Expected: mutationSeq increments; prior code verification becomes stale;
+# ledger gains verification_obligation_stale.
+
+# 6. Re-ask the gate.
+echo '{"hookEventName":"Stop","stop_hook_active":false}' \
+  | node dist/src/hooks/twin-verification-gate.js
+# Expected: block again because stale code verification is not acceptable proof.
 ```
 
 Live sequence:
 
-1. Give Claude an implementation task (opens `Run local tests after code changes.` in `verification.required`).
-2. Steer the arc to `verifying`/`closing` (e.g. an artifact-evaluation or closure prompt) **without** running tests.
-3. Let Claude try to finish the turn.
+1. Give Claude an implementation task. This opens `Run local tests after code changes.` as a structured `block_stop` obligation.
+2. Let Claude try to finish without running tests.
+3. Observe whether live Claude receives a Stop block naming the unmet obligation.
+4. Have Claude run a real passing `npm test`.
+5. Observe whether `PostToolBatch` records pass evidence and closes the obligation.
+6. Make a later code mutation and observe whether prior code verification becomes stale and Stop blocks again.
 
 Expected evidence:
 
-- Claude receives a Stop block naming the unmet obligation and continues working instead of closing.
-- After Claude runs a real passing `npm test`, the `PostToolBatch` instrument writes `verification.completed` and the next Stop passes cleanly.
-- Ledger shows `verification_gate_block`, then `verification_obligation_closed`.
-- A failing test run instead logs `verification_caught_error` and the gate keeps blocking (up to the per-arc cap).
+- Claude receives a Stop block naming the unmet open/stale obligation and continues instead of silently closing.
+- Passing `npm test` creates structured evidence and closes the matching test obligation.
+- A later mutation marks prior code verification stale and clears the completed mirror.
+- Ledger shows `verification_gate_block`, `verification_obligation_closed`, and `verification_obligation_stale`.
+- A failing test run logs `verification_caught_error` and does not close the obligation.
 
 Loop-safety checks (must both hold):
 
@@ -689,12 +714,13 @@ Loop-safety checks (must both hold):
 
 Pass condition:
 
-- Block → real check → clean close, with all three ledger event types observable and no infinite loop.
+- Block → real check → clean close → later mutation → stale/block again, with ledger evidence and no infinite loop.
 
 Fail condition:
 
-- Gate blocks outside `verifying`/`closing` phases.
+- Open or stale blocking obligations do not block Stop.
 - An obligation closes without explicit pass evidence (false pass).
+- Later mutation does not stale code verification.
 - Stop loop does not terminate.
 
 Record:
@@ -703,6 +729,7 @@ Record:
 Verification gate catch: pass/fail
 Ledger events observed:
 Blocks before clean close:
+Mutation stale behavior:
 Notes:
 ```
 

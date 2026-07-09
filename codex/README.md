@@ -62,9 +62,20 @@ tail -3 "$(dirname "$TWIN_SPARROW_CLAUDE_STATE")/session-ledger.jsonl"
 ## Open verification (do before trusting obligation-closing)
 
 **[Hypothesis]** Codex's Bash `tool_response` inner shape is not yet confirmed
-against a live capture. `classifyToolResponse` already tolerates every shape seen
-so far (`{type,text}` | `{stdout,stderr}` | string | `{exitCode}` | `{success}`),
-which is the safety net — but capture one real Codex `PostToolUse` payload and
-confirm before relying on the verification gate under Codex. This mirrors audit
-finding R1. When a genuine divergence appears, add a targeted override in
-`src/host/codex-host.ts`; do not fork the parser.
+against a live capture. `classifyToolResponse` / `classifyToolResponseForCategory`
+already tolerate every shape seen so far (`{type,text}` | `{stdout,stderr}` |
+string | `{exitCode}` | `{success}`), which is the safety net — but capture one
+real Codex `PostToolUse` payload and confirm before relying on the verification
+gate under Codex. This mirrors audit finding R1. When a genuine divergence
+appears, add a targeted override in `src/host/codex-host.ts`; do not fork the
+parser.
+
+**[Hypothesis]** Non-Bash mutation invalidation is also not yet live-proven under
+Codex. The current `codex/hooks.json` wires `PostToolUse` with `matcher: "^Bash$"`,
+so mutating Bash commands can be observed, but Edit/Write-style tool observations
+may not reach the adapter. To trust stale-verification enforcement under Codex,
+either broaden the hook wiring if Codex supports it, or capture live evidence that
+non-Bash mutation tools are delivered to a configured hook.
+
+Track both items in `../docs/LIVE_HOOK_VALIDATION.md` before promoting Codex from
+local/simulated support to live-validated support.

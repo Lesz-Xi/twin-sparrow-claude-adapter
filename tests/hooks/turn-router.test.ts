@@ -42,6 +42,9 @@ test("UserPromptSubmit emits companion and working-state capsules", () => {
   assert.equal(result.state.companion.orientation, "atoman");
   assert.equal(result.state.workingState.taskType, "implementation");
   assert.deepEqual(result.state.workingState.verification.required, ["Run local tests after code changes."]);
+  assert.match(result.outputJson.hookSpecificOutput.additionalContext, /Verification mutation seq: 0/);
+  assert.match(result.outputJson.hookSpecificOutput.additionalContext, /open \/ blocking \/ test: Run local tests after code changes\./);
+  assert.match(result.outputJson.hookSpecificOutput.additionalContext, /Latest verification evidence: none/);
 });
 
 test("acknowledgments preserve companion continuity", () => {

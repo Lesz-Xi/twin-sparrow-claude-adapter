@@ -5,7 +5,9 @@
 > **Provenance:** falls out of *Experiment 01 — Loop-Economics*
 > (`~/.twin-sparrow/agent/memory/Yt Transcribe/Naval & YC Combinator/Experiment-01-Loop-Economics/`).
 
-> **2026-07-07 supersession note:** This handoff is historical rationale. The live implementation now uses `PostToolBatch` for the verification instrument, documents Claude's `{ type, text }` hook response shape, emits `hookSpecificOutput.hookEventName`, rotates `arcId` on `SessionStart`, and keeps obligations same-turn rather than persistent across prompts.
+> **2026-07-07 supersession note:** This handoff is historical rationale. The live implementation now uses `PostToolBatch` for the Claude verification instrument, documents Claude's `{ type, text }` hook response shape, emits `hookSpecificOutput.hookEventName`, rotates `arcId` on `SessionStart`, and keeps obligations same-turn rather than persistent across prompts.
+>
+> **2026-07-09 architecture update:** Verification has moved beyond the original two-list string mirror. The current implementation stores structured obligations, evidence, mutation sequence, closure policy, and stale status. `Stop` blocks any open/stale `block_stop` obligation independent of phase, with loop guards preserved. Later code mutations stale prior code verification. See `docs/LIVE_HOOK_VALIDATION.md` for the live-host claim boundary.
 
 ---
 
@@ -15,29 +17,36 @@ Experiment 01 turned the Naval-vs-Daniel argument into one metric — **cost per
 
 ## 2. The gap, in the adapter's own types
 
-- `src/state/schema.ts` already defines the proof-obligation ledger:
-  ```ts
-  workingState.verification: { readonly required: readonly string[]; readonly completed: readonly string[] }
-  ```
-  and `session.phase: "exploring" | "planning" | "implementing" | "verifying" | "closing"`.
-- `src/capsules/working-state-capsule.ts` only **renders** `required`/`completed` as text.
-- `hooks/hooks.json` wires only `SessionStart` and `UserPromptSubmit` — **both pre-turn**.
-- `src/hooks/twin-turn-router.ts` emits only `hookSpecificOutput.additionalContext` — **never a `decision: block`.**
+Historical gap at handoff time:
 
-Net: `verification.completed` is **never written**, and nothing enforces `required ⊆ completed`. Catch rate ≈ 0.
+- the proof-obligation ledger was only a pair of string-list mirrors;
+- `working-state-capsule.ts` rendered only those string mirrors;
+- hooks were pre-turn only;
+- nothing could emit a Stop `decision: "block"`.
+
+Current implementation:
+
+- `src/state/schema.ts` stores structured verification obligations, evidence, mutation sequence, stale status, and closure policy;
+- `src/capsules/working-state-capsule.ts` renders a compact structured verification summary;
+- Claude uses `PostToolBatch` + `Stop`; Codex uses `PostToolUse` + `Stop`;
+- `Stop` blocks open/stale `block_stop` obligations and degrades after the bounded loop guard.
+
+Net: the original catch-rate gap is locally closed in simulated hook tests. Live-host proof is still tracked in `docs/LIVE_HOOK_VALIDATION.md`.
 
 ## 3. Design (MVP scope)
 
 Two cooperating hooks close the loop; one capsule explains the block. **Keep it conservative — a false _pass_ is the expensive failure (lets a wrong turn through); a false _block_ is merely annoying and is hard-bounded so it degrades to a warning.**
 
-```
-UserPromptSubmit (exists)  → turn-router opens obligations into verification.required (already happens via classifier/phase)
-PostToolUse      (NEW)     → instrument: on unambiguous pass evidence, append to verification.completed; on failure, log a caught error
-Stop             (NEW)     → gate: if phase ∈ {verifying, closing} AND required ⊄ completed AND not already looping → decision:"block"
+```text
+UserPromptSubmit → turn-router opens structured `block_stop` obligations
+PostToolBatch / PostToolUse → instrument records pass/fail/unknown evidence and closes only matching obligations
+Mutation observation → increments mutationSeq and marks prior code verification stale
+Stop → blocks any open/stale blocking obligation unless loop guards apply
 ```
 
-- **`PostToolUse` = the instrument (the catch).** Ground truth lives here: exit codes, test/lint/type/build results. It is the only thing that writes `verification.completed`, and it writes **only** on explicit success signals. Never fabricates.
-- **`Stop` = the enforcement.** Refuses to end a turn with open obligations, and hands Claude a precise reason. Bounded against infinite loops (see §6).
+- **`PostToolBatch` / `PostToolUse` = the instrument (the catch).** Ground truth lives here: test/lint/type/build results. It writes structured evidence and closes obligations **only** on explicit category-matched success signals. Never fabricates.
+- **Mutation observation = freshness guard.** Later code mutations stale prior code verification so “tests passed before the edit” cannot masquerade as current proof.
+- **`Stop` = the enforcement.** Refuses to end a turn with open/stale blocking obligations, and hands Claude a precise reason. Bounded against infinite loops (see §6).
 
 ### Why both are in the MVP
 Within a single user turn there is **no** second `UserPromptSubmit`; a `Stop` block makes Claude continue in the *same* turn. So a Stop gate alone could never clear (nothing writes `completed`). The `PostToolUse` instrument is what lets the gate clear from evidence within the turn. They are minimal *together*.
@@ -54,16 +63,16 @@ import type { TwinAdapterState } from "../state/schema.js";
 
 export const VERIFICATION_GATE_CAPSULE_CLASS = "verification-gate";
 
-/** Pure: returns the list of required obligations not yet in completed. */
+/** Pure: returns the list of blocking obligations not yet satisfied. */
 export function openObligations(state: TwinAdapterState): readonly string[] {
-  const done = new Set(state.workingState.verification.completed.map((s) => s.trim().toLowerCase()));
-  return state.workingState.verification.required.filter((r) => !done.has(r.trim().toLowerCase()));
+  return state.workingState.verification.obligations
+    .filter((obligation) => obligation.closurePolicy === "block_stop" && (obligation.status === "open" || obligation.status === "stale"))
+    .map((obligation) => obligation.reason);
 }
 
 /** Pure: should the Stop gate block this turn's closure? */
 export function shouldBlockClose(state: TwinAdapterState): boolean {
-  const gating = state.session.phase === "verifying" || state.session.phase === "closing";
-  return gating && openObligations(state).length > 0;
+  return openObligations(state).length > 0;
 }
 
 /** Human-readable reason handed back to Claude on block. */
@@ -181,18 +190,24 @@ Add `verification_gate_block`, `verification_gate_warn`, `verification_caught_er
 
 ## 5. Tests (mirror `tests/hooks/*`, add fixtures)
 
+Current tests include:
+
 `tests/hooks/verification-gate.test.ts`:
-1. phase `implementing`, open obligations → **allow** (gate only fires in verifying/closing).
-2. phase `closing`, `required=["tests pass"]`, `completed=[]` → **block** with reason naming "tests pass".
-3. phase `closing`, `required ⊆ completed` → **allow**.
+1. phase `implementing`, open obligations → **block**.
+2. real implementation prompt opens `Run local tests after code changes.` and Stop blocks before verification.
+3. closed obligations → **allow**.
 4. `stop_hook_active: true` → **allow** (loop guard), even with open obligations.
 5. `MAX_BLOCKS_PER_ARC` reached → **allow** + warning + `verification_gate_warn` ledger event.
 
 `tests/hooks/posttooluse-instrument.test.ts`:
-6. Bash `npm test` exit 0, open obligation "tests pass" → appends completed marker (category match).
-7. Bash `npm run lint` exit 0, open obligation "tests pass" → does **not** close (category mismatch).
-8. Bash `npm test` exit 1 → no close, logs `verification_caught_error`.
-9. Non-Bash tool → no-op.
+6. Bash `npm test` pass evidence closes a matching test obligation.
+7. category-matched string success can close; ambiguous strings record unknown evidence and do not close.
+8. Bash `npm run lint` pass evidence does **not** close a test obligation.
+9. Bash `npm test` failure logs `verification_caught_error`.
+10. non-Bash non-mutating tools are no-op.
+11. Edit/Write-style mutation tools stale prior code verification.
+12. mutating Bash commands stale prior code verification.
+13. PostToolBatch preserves mutation-before-verification ordering.
 
 Add hook-event fixtures to `tests/fixtures/claude-hook-events.ts`. Run `npm run check` (build + `node --test`) — must be green.
 
@@ -203,14 +218,14 @@ Add hook-event fixtures to `tests/fixtures/claude-hook-events.ts`. Run `npm run 
 | **Infinite Stop-block loop** | Honor `stop_hook_active` (Guard 1) — never block when already looping. |
 | **User trapped by a stubborn obligation** | `MAX_BLOCKS_PER_ARC = 2`, counted from ledger; then downgrade to warning (Guard 2). |
 | **False pass (lets a broken turn close)** | Instrument closes obligations **only** on exit 0 **and** category match; prefers not to close. |
-| **Over-eager gating** | Gate fires **only** in `verifying`/`closing` phases, not during `implementing`. |
+| **Over-eager gating** | Gate blocks only explicit open/stale `block_stop` obligations, with loop guards and max-block degradation. |
 | **State bloat / concurrent writes** | Use `updateTwinAdapterState` (read-modify-write); `MAX_STATE_BYTES` (64 KB) already enforced. |
 | **Hook latency** | `timeout: 5`s like existing hooks; all logic is local, no model calls. |
 
 ## 7. Assumptions to verify before/while building
 - **Claude Code hook contract** (`Stop` → `{decision:"block", reason}`; `stop_hook_active`; `PostToolUse` → `tool_name`/`tool_input`/`tool_response`; `matcher`). Confirm against the installed CLI version; adjust field names if they differ. Do not assume — check.
-- **Who sets `session.phase` to verifying/closing.** Confirm the turn-router/classifier already advances the arc; if not, add minimal phase advancement (out-of-scope note below).
-- **Who populates `verification.required`.** Confirm the classifier opens obligations for debug/implementation tasks; if it doesn't yet, the gate is inert until it does (thread this in a follow-up).
+- **Which host delivers which tool observations live.** Local fixtures prove the adapter logic; live Claude/Codex capture must prove host delivery.
+- **Who populates verification obligations.** The classifier opens implementation/source/artifact obligations locally; live host injection still needs smoke validation.
 
 ## 8. Acceptance criteria
 - `npm run check` green (build + all tests incl. the 9 new ones).

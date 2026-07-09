@@ -7,6 +7,34 @@ export type ArtifactType = "plan" | "spec" | "diff" | "review" | "report" | "raw
 export type ApprovalState = "not_required" | "required" | "approved" | "approved_with_notes" | "rejected" | "blocked";
 export type SkillHydrationStatus = "hydrated" | "blocked";
 export type CompanionCheckInReason = "none" | "atoman_streak" | "solaris_stalled";
+export type VerificationCategory = "test" | "lint" | "type" | "build" | "source" | "artifact";
+export type VerificationVerdict = "pass" | "fail" | "unknown";
+export type VerificationStatus = "open" | "closed" | "stale";
+export type VerificationClosurePolicy = "block_stop" | "advisory";
+export type VerificationEvidenceHost = "claude" | "codex" | "unknown";
+
+export interface VerificationEvidence {
+  readonly id: string;
+  readonly category: VerificationCategory;
+  readonly verdict: VerificationVerdict;
+  readonly command: string;
+  readonly host: VerificationEvidenceHost;
+  readonly observedAt: string;
+  readonly observedAtMutationSeq: number;
+  readonly rawShape: string;
+  readonly summary: string;
+}
+
+export interface VerificationObligation {
+  readonly id: string;
+  readonly category: VerificationCategory;
+  readonly reason: string;
+  readonly status: VerificationStatus;
+  readonly closurePolicy: VerificationClosurePolicy;
+  readonly openedAt: string;
+  readonly openedAtMutationSeq: number;
+  readonly closedByEvidenceId?: string;
+}
 
 export interface CompanionCheckInState {
   readonly required: boolean;
@@ -37,8 +65,13 @@ export interface WorkingStateActiveFile {
 }
 
 export interface WorkingStateVerification {
+  /** Compatibility mirror for older capsules/tests; new enforcement uses obligations. */
   readonly required: readonly string[];
+  /** Compatibility mirror for older capsules/tests; new enforcement uses obligations/evidence. */
   readonly completed: readonly string[];
+  readonly mutationSeq: number;
+  readonly obligations: readonly VerificationObligation[];
+  readonly evidence: readonly VerificationEvidence[];
 }
 
 export interface ArtifactPointer {
@@ -107,6 +140,11 @@ const APPROVAL_STATES = new Set<ApprovalState>(["not_required", "required", "app
 const SOURCE_KINDS = new Set<SourcePointer["kind"]>(["file", "url", "browser", "unknown"]);
 const SKILL_HYDRATION_STATUSES = new Set<SkillHydrationStatus>(["hydrated", "blocked"]);
 const COMPANION_CHECK_IN_REASONS = new Set<CompanionCheckInReason>(["none", "atoman_streak", "solaris_stalled"]);
+const VERIFICATION_CATEGORIES = new Set<VerificationCategory>(["test", "lint", "type", "build", "source", "artifact"]);
+const VERIFICATION_VERDICTS = new Set<VerificationVerdict>(["pass", "fail", "unknown"]);
+const VERIFICATION_STATUSES = new Set<VerificationStatus>(["open", "closed", "stale"]);
+const VERIFICATION_CLOSURE_POLICIES = new Set<VerificationClosurePolicy>(["block_stop", "advisory"]);
+const VERIFICATION_EVIDENCE_HOSTS = new Set<VerificationEvidenceHost>(["claude", "codex", "unknown"]);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -191,11 +229,143 @@ function activeFiles(value: unknown): readonly WorkingStateActiveFile[] {
   });
 }
 
-function verification(value: unknown, fallback: WorkingStateVerification): WorkingStateVerification {
-  if (!isRecord(value)) return fallback;
+function compactIdPart(value: string): string {
+  const compact = value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return compact ? compact.slice(0, 48) : "verification";
+}
+
+function inferVerificationCategory(text: string): VerificationCategory {
+  if (/\btests?\b|\bvitest\b|\bjest\b|node --test/i.test(text)) return "test";
+  if (/\blint\b|\bbiome\b|\beslint\b/i.test(text)) return "lint";
+  if (/\btsc\b|\btype-?check\b/i.test(text)) return "type";
+  if (/\bbuild\b/i.test(text)) return "build";
+  if (/\bsource\b|\bgrounded claims?\b/i.test(text)) return "source";
+  if (/\bartifact\b|\bapproval\b/i.test(text)) return "artifact";
+  return "test";
+}
+
+export function createVerificationObligation(input: {
+  readonly reason: string;
+  readonly now: string;
+  readonly index?: number;
+  readonly category?: VerificationCategory;
+  readonly status?: VerificationStatus;
+  readonly closurePolicy?: VerificationClosurePolicy;
+  readonly openedAtMutationSeq?: number;
+  readonly closedByEvidenceId?: string;
+}): VerificationObligation {
+  const index = input.index ?? 0;
   return {
-    required: stringArray(value.required),
-    completed: stringArray(value.completed),
+    id: `obl-${index + 1}-${compactIdPart(input.reason)}`,
+    category: input.category ?? inferVerificationCategory(input.reason),
+    reason: input.reason,
+    status: input.status ?? "open",
+    closurePolicy: input.closurePolicy ?? "block_stop",
+    openedAt: input.now,
+    openedAtMutationSeq: input.openedAtMutationSeq ?? 0,
+    ...(input.closedByEvidenceId ? { closedByEvidenceId: input.closedByEvidenceId } : {}),
+  };
+}
+
+export function createVerificationState(input: {
+  readonly required: readonly string[];
+  readonly completed?: readonly string[];
+  readonly now: string;
+  readonly mutationSeq?: number;
+}): WorkingStateVerification {
+  const completed = input.completed ?? [];
+  const normalizedCompleted = new Set(completed.map((item) => item.trim().toLowerCase()));
+  const evidence = completed.map(
+    (reason, index): VerificationEvidence => ({
+      id: `legacy-evidence-${index + 1}-${compactIdPart(reason)}`,
+      category: inferVerificationCategory(reason),
+      verdict: "pass",
+      command: "legacy-state-completed",
+      host: "unknown",
+      observedAt: input.now,
+      observedAtMutationSeq: input.mutationSeq ?? 0,
+      rawShape: "legacy-state",
+      summary: reason,
+    }),
+  );
+  const evidenceByReason = new Map(completed.map((reason, index) => [reason.trim().toLowerCase(), evidence[index]?.id ?? ""]));
+  const obligations = input.required.map((reason, index) => {
+    const evidenceId = evidenceByReason.get(reason.trim().toLowerCase());
+    return createVerificationObligation({
+      reason,
+      now: input.now,
+      index,
+      status: normalizedCompleted.has(reason.trim().toLowerCase()) ? "closed" : "open",
+      openedAtMutationSeq: input.mutationSeq ?? 0,
+      ...(evidenceId ? { closedByEvidenceId: evidenceId } : {}),
+    });
+  });
+  return {
+    required: input.required,
+    completed,
+    mutationSeq: input.mutationSeq ?? 0,
+    obligations,
+    evidence,
+  };
+}
+
+function verificationEvidence(value: unknown): readonly VerificationEvidence[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item): VerificationEvidence[] => {
+    if (!isRecord(item) || typeof item.id !== "string" || typeof item.command !== "string") return [];
+    return [
+      {
+        id: item.id,
+        category: enumValue(item.category, VERIFICATION_CATEGORIES, "test"),
+        verdict: enumValue(item.verdict, VERIFICATION_VERDICTS, "unknown"),
+        command: item.command,
+        host: enumValue(item.host, VERIFICATION_EVIDENCE_HOSTS, "unknown"),
+        observedAt: stringValue(item.observedAt, ""),
+        observedAtMutationSeq: numberValue(item.observedAtMutationSeq, 0),
+        rawShape: stringValue(item.rawShape, "unknown"),
+        summary: stringValue(item.summary, ""),
+      },
+    ];
+  });
+}
+
+function verificationObligations(value: unknown, now: string, mutationSeq: number): readonly VerificationObligation[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item, index): VerificationObligation[] => {
+    if (!isRecord(item) || typeof item.reason !== "string") return [];
+    return [
+      createVerificationObligation({
+        reason: item.reason,
+        now: stringValue(item.openedAt, now),
+        index,
+        category: enumValue(item.category, VERIFICATION_CATEGORIES, inferVerificationCategory(item.reason)),
+        status: enumValue(item.status, VERIFICATION_STATUSES, "open"),
+        closurePolicy: enumValue(item.closurePolicy, VERIFICATION_CLOSURE_POLICIES, "block_stop"),
+        openedAtMutationSeq: numberValue(item.openedAtMutationSeq, mutationSeq),
+        ...(typeof item.closedByEvidenceId === "string" ? { closedByEvidenceId: item.closedByEvidenceId } : {}),
+      }),
+    ];
+  });
+}
+
+function verification(value: unknown, fallback: WorkingStateVerification, now: string): WorkingStateVerification {
+  if (!isRecord(value)) return fallback;
+  const required = stringArray(value.required);
+  const completed = stringArray(value.completed);
+  const mutationSeq = numberValue(value.mutationSeq, 0);
+  const parsedEvidence = verificationEvidence(value.evidence);
+  const parsedObligations = verificationObligations(value.obligations, now, mutationSeq);
+  const legacy = createVerificationState({ required, completed, now, mutationSeq });
+
+  return {
+    required,
+    completed,
+    mutationSeq,
+    obligations: parsedObligations.length > 0 ? parsedObligations : legacy.obligations,
+    evidence: parsedEvidence.length > 0 ? parsedEvidence : legacy.evidence,
   };
 }
 
@@ -256,10 +426,7 @@ export function createDefaultState(input: { readonly now?: string; readonly sess
       activeFiles: [],
       establishedFacts: [],
       pendingActions: ["Build the minimal Claude adapter skeleton."],
-      verification: {
-        required: [],
-        completed: [],
-      },
+      verification: createVerificationState({ required: [], now }),
       nextStep: "Build the minimal Claude adapter skeleton.",
     },
     artifacts: {
@@ -321,7 +488,7 @@ export function parseTwinAdapterState(value: unknown, fallback: TwinAdapterState
         activeFiles: activeFiles(workingState.activeFiles),
         establishedFacts: stringArray(workingState.establishedFacts),
         pendingActions: stringArray(workingState.pendingActions),
-        verification: verification(workingState.verification, fallback.workingState.verification),
+        verification: verification(workingState.verification, fallback.workingState.verification, stringValue(value.updatedAt, fallback.updatedAt)),
         nextStep: stringValue(workingState.nextStep, fallback.workingState.nextStep),
       },
       artifacts: {

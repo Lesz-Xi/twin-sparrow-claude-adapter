@@ -1,4 +1,5 @@
 import type { TwinAdapterState, WorkingStateActiveFile } from "../state/schema.js";
+import { formatVerificationSummary } from "../state/verification-format.js";
 
 export const WORKING_STATE_CAPSULE_CLASS = "working-state";
 
@@ -20,8 +21,7 @@ export function renderWorkingStateCapsule(state: TwinAdapterState): string {
     ...formatActiveFiles(state.workingState.activeFiles),
     ...formatList("Established facts", state.workingState.establishedFacts),
     ...formatList("Pending actions", state.workingState.pendingActions),
-    ...formatList("Verification required", state.workingState.verification.required),
-    ...formatList("Verification completed", state.workingState.verification.completed),
+    ...formatVerificationSummary(state.workingState.verification),
     `Next step: ${state.workingState.nextStep}`,
     `Source grounding: ${state.sourceGrounding.mode}${state.sourceGrounding.required ? " / required" : ""}`,
     `Pending artifact reviews: ${state.artifacts.pendingReview.length}`,

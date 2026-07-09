@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/cover.png" alt="Twin-Sparrow Agent Adapter" width="100%">
+  <img src="./assets/cover.png" alt="Twin-Sparrow Agent Adapter cover — two sparrows on a quiet monochrome branch" width="1000">
 </p>
 
 <h1 align="center">Twin-Sparrow Agent Adapter</h1>
@@ -44,7 +44,7 @@ Twin-Sparrow should feel present inside Claude while Claude receives only the sm
 | **Artifact review** | Approval-required gate for consequential actions |
 | **Token economics** | Estimates-only ledger — no unproven savings claims |
 | **Skill gates** | Fail-closed hydration of the allowlisted Twin-Sparrow skill inventory |
-| **Verification gate** | Blocks same-turn closure on unmet proof obligations; obligations close only when a runner-shaped verification command reports pass evidence |
+| **Verification gate** | Blocks same-turn closure on open/stale proof obligations; obligations close only when runner-shaped verification commands report pass evidence; later mutations stale prior code verification |
 | **Multi-host core** | Hook I/O normalized behind a host port; the same compiled core runs under Claude Code and Codex CLI |
 
 ## Current status
@@ -55,14 +55,14 @@ Initial runnable adapter skeleton implemented — the runtime plumbing and every
 - `SessionStart` tiny Twin contract and `UserPromptSubmit` turn router
 - `PostToolBatch` (Claude) / `PostToolUse` (Codex) verification instrument and `Stop` verification gate —
   the retrospective "catch" layer: same-turn obligations close only on runner-shaped pass evidence, and
-  closure is blocked until they do (loop-bounded — see [docs/VERIFICATION_GATE_HANDOFF.md](docs/VERIFICATION_GATE_HANDOFF.md))
+  closure is blocked until they do; later mutations stale prior code verification (loop-bounded — see [docs/VERIFICATION_GATE_HANDOFF.md](docs/VERIFICATION_GATE_HANDOFF.md))
 - `src/host/` — a host port (`AgentHostPort`) that normalizes hook payloads and output rendering;
   `claudeHost` and `codexHost` are both thin instances of the shared hooks.json-contract implementation
   (see [Multi-host architecture](#multi-host-architecture-claude-code--codex-cli))
 - safe JSON state store and append-only JSONL session ledger
 - six runtime capsules from [Capabilities](#capabilities-at-a-glance); the verification gate is a Stop-hook/runtime catch layer, not a per-turn capsule
 - read-only `/twin-status` operator command target
-- Node test fixtures (71 passing), `docs/HONEST_NUMBERS.md`, and `docs/CLAUDE_SMOKE_TEST.md`
+- Node test fixtures (79 passing), `docs/HONEST_NUMBERS.md`, `docs/CLAUDE_SMOKE_TEST.md`, and `docs/LIVE_HOOK_VALIDATION.md`
 
 Verify locally:
 
@@ -82,7 +82,7 @@ arrives on stdin and how context/decisions are rendered back — is host-specifi
 seam is isolated in `src/host/`:
 
 - **`src/host/host-port.ts`** — the `AgentHostPort` interface every host implements
-  (parse payload, extract prompt/Bash-observations/Stop-signal, render context/decision).
+  (parse payload, extract prompt/tool observations/Bash observations/Stop signal, render context/decision).
 - **`src/host/hooks-json-host.ts`** — the shared implementation of the `hooks.json` contract
   (JSON on stdin, `{hookSpecificOutput.additionalContext}` / `{decision:"block",reason}` on stdout)
   that Claude Code and Codex CLI both use.
@@ -98,13 +98,11 @@ pointing `TWIN_SPARROW_ADAPTER_ROOT` at this repo, merging `codex/hooks.json` in
 `~/.codex/hooks.json`, and installing `codex/AGENTS.md`'s tiny contract). Codex has no
 `PostToolBatch` event, so its verification instrument runs per-tool on `PostToolUse` instead.
 
-**Open verification**: the wire *shapes* Claude Code and Codex CLI use for `SessionStart`,
-`UserPromptSubmit`, `PostToolUse`, and `Stop` are confirmed identical from both hosts' own
-documentation and a live `~/.codex/hooks.json`. The one unconfirmed detail is the inner shape of
-Codex's Bash `tool_response` payload — `classifyToolResponse` already tolerates every shape seen
-across both hosts, but that tolerance hasn't been checked against a live Codex capture yet. See
-[codex/README.md](codex/README.md#open-verification-do-before-trusting-obligation-closing) before
-relying on the verification gate under Codex.
+**Open verification**: local simulated hook tests pass, but live host behavior is not yet fully validated.
+The remaining claim boundary is tracked in [docs/LIVE_HOOK_VALIDATION.md](docs/LIVE_HOOK_VALIDATION.md).
+Two Codex details especially require live evidence before relying on production claims: the inner shape of
+Codex's Bash `tool_response` payload, and whether non-Bash mutation tools are observable with the current
+`PostToolUse` hook matcher. See [codex/README.md](codex/README.md#open-verification-do-before-trusting-obligation-closing).
 
 ## Claude Desktop MCP launcher
 
@@ -177,14 +175,15 @@ versioned plugin cache. A restart alone may keep serving the old cached version.
 ## Next implementation slice
 
 1. Run the live Claude smoke test from `docs/CLAUDE_SMOKE_TEST.md`, including Test 11
-   (verification gate catch layer).
-2. Capture a real Codex CLI `PostToolUse` payload and confirm the Bash `tool_response`
-   shape against `classifyToolResponse` (see [Multi-host architecture](#multi-host-architecture-claude-code--codex-cli)).
-3. Record pass/fail evidence without claiming token savings.
-4. Fix any hook/manifest/command wiring issues discovered live, on either host.
-5. Export a real catch-rate metric from the ledger (`verification_gate_block` /
+   (verification gate catch layer with mutation staling).
+2. Complete the host matrix in `docs/LIVE_HOOK_VALIDATION.md` for Claude Code and Codex CLI.
+3. Capture a real Codex CLI `PostToolUse` payload and confirm the Bash `tool_response`
+   shape against `classifyToolResponse`; also confirm whether non-Bash mutation tools are observable.
+4. Record pass/fail evidence without claiming token savings.
+5. Fix any hook/manifest/command wiring issues discovered live, on either host.
+6. Export a real catch-rate metric from the ledger (`verification_gate_block` /
    `verification_caught_error`) once live data exists.
-6. Prepare a repo-extraction checklist after live validation.
+7. Prepare a repo-extraction checklist after live validation.
 
 ## Boundary
 

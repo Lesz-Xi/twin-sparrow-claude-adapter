@@ -1,4 +1,4 @@
-import type { BashToolObservation } from "../hooks/verification-instrument-core.js";
+import type { BashToolObservation, ToolObservation } from "../hooks/verification-instrument-core.js";
 
 /**
  * The single seam between Twin-Sparrow's host-neutral core and a specific agent
@@ -49,6 +49,9 @@ export interface AgentHostPort {
 
   /** Extract the user prompt text from a UserPromptSubmit payload. */
   extractPrompt(payload: unknown): string;
+
+  /** Extract all tool observations from a PostToolUse or PostToolBatch payload. */
+  extractToolObservations(payload: unknown): readonly ToolObservation[];
 
   /** Extract Bash tool observations from a PostToolUse or PostToolBatch payload. */
   extractBashObservations(payload: unknown): readonly BashToolObservation[];

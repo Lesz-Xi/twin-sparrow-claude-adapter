@@ -18,12 +18,12 @@ export interface PostToolBatchOptions {
 
 export function handlePostToolBatch(rawInput: string, options: PostToolBatchOptions = {}): PostToolBatchResult {
   const host = resolveHost();
-  const observations = host.extractBashObservations(host.parsePayload(rawInput));
+  const observations = host.extractToolObservations(host.parsePayload(rawInput));
   if (observations.length === 0) {
     return { outputJson: {}, state: null, warnings: [] };
   }
 
-  const result = handleBashVerificationBatch(observations, options);
+  const result = handleBashVerificationBatch(observations, { ...options, hostId: host.id });
   return {
     outputJson: renderVerificationReceipt(host, "PostToolBatch", result.closed),
     state: result.state,

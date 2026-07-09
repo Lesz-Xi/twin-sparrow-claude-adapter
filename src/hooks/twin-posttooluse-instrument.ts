@@ -1,11 +1,11 @@
 import { stdin as input } from "node:process";
 import { fileURLToPath } from "node:url";
 import { resolveHost } from "../host/index.js";
-import { handleBashVerificationBatch, classifyToolResponse } from "./verification-instrument-core.js";
+import { handleBashVerificationBatch, classifyToolResponse, classifyToolResponseForCategory } from "./verification-instrument-core.js";
 import { renderVerificationReceipt } from "./verification-receipt.js";
 import type { TwinAdapterState } from "../state/schema.js";
 
-export { classifyToolResponse };
+export { classifyToolResponse, classifyToolResponseForCategory };
 
 export interface PostToolUseResult {
   readonly outputJson: Record<string, unknown>;
@@ -20,12 +20,12 @@ export interface PostToolUseOptions {
 
 export function handlePostToolUse(rawInput: string, options: PostToolUseOptions = {}): PostToolUseResult {
   const host = resolveHost();
-  const observations = host.extractBashObservations(host.parsePayload(rawInput));
+  const observations = host.extractToolObservations(host.parsePayload(rawInput));
   if (observations.length === 0) {
     return { outputJson: {}, state: null, warnings: [] };
   }
 
-  const result = handleBashVerificationBatch(observations, options);
+  const result = handleBashVerificationBatch(observations, { ...options, hostId: host.id });
   return {
     outputJson: renderVerificationReceipt(host, "PostToolUse", result.closed),
     state: result.state,

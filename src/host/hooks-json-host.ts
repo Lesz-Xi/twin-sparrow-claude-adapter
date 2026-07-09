@@ -1,4 +1,4 @@
-import type { BashToolObservation } from "../hooks/verification-instrument-core.js";
+import type { BashToolObservation, ToolObservation } from "../hooks/verification-instrument-core.js";
 import type {
   AgentHostPort,
   ContextOutput,
@@ -91,21 +91,21 @@ function valueField(record: Record<string, unknown>, keys: readonly string[]): u
   return undefined;
 }
 
-function observationFromRecord(record: Record<string, unknown>): BashToolObservation | null {
+function observationFromRecord(record: Record<string, unknown>): ToolObservation | null {
   const toolName = stringField(record, ["tool_name", "toolName", "name"]);
-  if (toolName !== "Bash") return null;
+  if (!toolName) return null;
 
   const inputRecord = recordField(record, ["tool_input", "toolInput", "input"]);
   const command = inputRecord ? stringField(inputRecord, ["command"]) : null;
-  if (!command) return null;
 
   return {
-    command,
+    toolName,
+    ...(command ? { command } : {}),
     response: valueField(record, ["tool_response", "toolResponse", "response", "tool_result", "toolResult", "result"]),
   };
 }
 
-function collectObservations(value: unknown, depth = 0): readonly BashToolObservation[] {
+function collectObservations(value: unknown, depth = 0): readonly ToolObservation[] {
   if (depth > 8) return [];
   if (Array.isArray(value)) {
     return value.flatMap((item) => collectObservations(item, depth + 1));
@@ -118,8 +118,15 @@ function collectObservations(value: unknown, depth = 0): readonly BashToolObserv
   return Object.values(value).flatMap((item) => collectObservations(item, depth + 1));
 }
 
-function extractBashObservations(payload: unknown): readonly BashToolObservation[] {
+function extractToolObservations(payload: unknown): readonly ToolObservation[] {
   return collectObservations(payload);
+}
+
+function extractBashObservations(payload: unknown): readonly BashToolObservation[] {
+  return collectObservations(payload).flatMap((observation): BashToolObservation[] => {
+    if (observation.toolName !== "Bash" || !observation.command) return [];
+    return [{ command: observation.command, response: observation.response, toolName: "Bash" }];
+  });
 }
 
 // ---- Stop --------------------------------------------------------------------
@@ -165,6 +172,7 @@ export function createHooksJsonHost(id: HostId, overrides: Partial<AgentHostPort
     id,
     parsePayload,
     extractPrompt,
+    extractToolObservations,
     extractBashObservations,
     extractStop,
     extractSessionStart,

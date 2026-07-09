@@ -1,14 +1,16 @@
-import type { TwinAdapterState } from "../state/schema.js";
+import type { TwinAdapterState, VerificationCategory } from "../state/schema.js";
+
+export type { VerificationCategory };
 
 export const VERIFICATION_GATE_CAPSULE_CLASS = "verification-gate";
-
-export type VerificationCategory = "test" | "lint" | "type" | "build";
 
 const CATEGORY_PATTERNS: ReadonlyArray<readonly [VerificationCategory, readonly RegExp[]]> = [
   ["test", [/\btests?\b/i, /\bvitest\b/i, /\bjest\b/i, /node --test/i]],
   ["lint", [/\blint\b/i, /\bbiome\b/i, /\beslint\b/i]],
   ["type", [/\btsc\b/i, /\btype-?check\b/i]],
   ["build", [/\bbuild\b/i]],
+  ["source", [/\bsource\b/i, /\bgrounded claims?\b/i]],
+  ["artifact", [/\bartifact\b/i, /\bapproval\b/i]],
 ];
 
 const TEST_RUNNERS = new Set(["test", "t", "vitest", "jest"]);
@@ -91,16 +93,22 @@ function normalize(value: string): string {
   return value.trim().toLowerCase();
 }
 
-/** Pure: returns the list of required obligations not yet in completed. */
+/** Pure: returns the list of blocking obligations not yet satisfied. */
 export function openObligations(state: TwinAdapterState): readonly string[] {
+  const obligations = state.workingState.verification.obligations;
+  if (obligations.length > 0) {
+    return obligations
+      .filter((obligation) => obligation.closurePolicy === "block_stop" && (obligation.status === "open" || obligation.status === "stale"))
+      .map((obligation) => obligation.reason);
+  }
+
   const done = new Set(state.workingState.verification.completed.map(normalize));
   return state.workingState.verification.required.filter((required) => !done.has(normalize(required)));
 }
 
 /** Pure: should the Stop gate block this turn's closure? */
 export function shouldBlockClose(state: TwinAdapterState): boolean {
-  const gating = state.session.phase === "verifying" || state.session.phase === "closing";
-  return gating && openObligations(state).length > 0;
+  return openObligations(state).length > 0;
 }
 
 /** Human-readable reason handed back to Claude on block. */

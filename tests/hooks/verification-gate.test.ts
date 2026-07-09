@@ -5,9 +5,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { handleStop, MAX_BLOCKS_PER_ARC } from "../../src/hooks/twin-verification-gate.js";
 import { handlePostToolUse } from "../../src/hooks/twin-posttooluse-instrument.js";
-import { createDefaultState, type TaskArcPhase } from "../../src/state/schema.js";
-import { writeTwinAdapterState } from "../../src/state/safe-state-store.js";
-import { documentedBashSuccessResponse, postToolUseBashFixture, stopHookFixture } from "../fixtures/claude-hook-events.js";
+import { handleUserPromptSubmit } from "../../src/hooks/twin-turn-router.js";
+import { createDefaultState, createVerificationState, type TaskArcPhase } from "../../src/state/schema.js";
+import { readTwinAdapterState, writeTwinAdapterState } from "../../src/state/safe-state-store.js";
+import { documentedBashSuccessResponse, postToolUseBashFixture, stopHookFixture, userPromptSubmitFixture } from "../fixtures/claude-hook-events.js";
 
 function tempStatePath(): string {
   return join(mkdtempSync(join(tmpdir(), "twin-claude-gate-")), "state.json");
@@ -21,7 +22,7 @@ function seedState(statePath: string, phase: TaskArcPhase, required: readonly st
       session: { ...base.session, phase },
       workingState: {
         ...base.workingState,
-        verification: { required, completed },
+        verification: createVerificationState({ required, completed, now: "2026-07-06T00:00:00.000Z" }),
       },
     },
     statePath,
@@ -38,11 +39,28 @@ function ledgerEvents(statePath: string): ReadonlyArray<{ type?: string; details
     .map((line) => JSON.parse(line) as { type?: string; details?: Record<string, unknown> });
 }
 
-test("gate allows close during implementing even with open obligations", () => {
+test("gate blocks close during implementing phase with unmet obligation", () => {
   const statePath = tempStatePath();
   seedState(statePath, "implementing", ["tests pass"], []);
   const result = handleStop(stopHookFixture(false), { statePath, now: "2026-07-06T01:00:00.000Z" });
-  assert.deepEqual(result.outputJson, {});
+  assert.equal(result.outputJson.decision, "block");
+  assert.match(String(result.outputJson.reason), /proof obligations are unmet/);
+  assert.match(String(result.outputJson.reason), /tests pass/);
+  assert.equal(ledgerEvents(statePath).at(-1)?.type, "verification_gate_block");
+});
+
+test("implementation prompt opens a blocking test obligation before Stop", () => {
+  const statePath = tempStatePath();
+  handleUserPromptSubmit(userPromptSubmitFixture("Implement a small code change"), { statePath, now: "2026-07-06T01:00:30.000Z" });
+
+  const state = readTwinAdapterState(statePath).state;
+  assert.equal(state.session.phase, "implementing");
+  assert.deepEqual(state.workingState.verification.required, ["Run local tests after code changes."]);
+  assert.deepEqual(state.workingState.verification.completed, []);
+
+  const result = handleStop(stopHookFixture(false), { statePath, now: "2026-07-06T01:00:45.000Z" });
+  assert.equal(result.outputJson.decision, "block");
+  assert.match(String(result.outputJson.reason), /Run local tests after code changes\./);
 });
 
 test("gate blocks close in closing phase with unmet obligation and names it", () => {

@@ -24,6 +24,35 @@ test("state write and read round trips", () => {
   assert.equal(result.state.session.id, "test-session");
 });
 
+test("legacy string verification state migrates to structured obligations", () => {
+  const path = join(tempDir(), "state.json");
+  const state = createDefaultState({ now: "2026-07-06T00:00:00.000Z", sessionId: "test-session" });
+  writeFileSync(
+    path,
+    JSON.stringify({
+      ...state,
+      workingState: {
+        ...state.workingState,
+        verification: {
+          required: ["Run local tests after code changes.", "Run local lint after code changes."],
+          completed: ["Run local tests after code changes."],
+        },
+      },
+    }),
+  );
+
+  const result = readTwinAdapterState(path);
+  assert.deepEqual(result.state.workingState.verification.required, ["Run local tests after code changes.", "Run local lint after code changes."]);
+  assert.deepEqual(result.state.workingState.verification.completed, ["Run local tests after code changes."]);
+  assert.equal(result.state.workingState.verification.mutationSeq, 0);
+  assert.equal(result.state.workingState.verification.obligations.length, 2);
+  assert.equal(result.state.workingState.verification.obligations[0]?.status, "closed");
+  assert.equal(result.state.workingState.verification.obligations[0]?.category, "test");
+  assert.equal(result.state.workingState.verification.obligations[1]?.status, "open");
+  assert.equal(result.state.workingState.verification.obligations[1]?.category, "lint");
+  assert.equal(result.state.workingState.verification.evidence[0]?.rawShape, "legacy-state");
+});
+
 test("symlink state path is refused", () => {
   const dir = tempDir();
   const target = join(dir, "target.json");
