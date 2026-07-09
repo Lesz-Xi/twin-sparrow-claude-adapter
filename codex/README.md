@@ -10,13 +10,14 @@ hooks in `dist/`; only the host adapter (`src/host/codex-host.ts`) and this
 | | Claude Code | Codex CLI |
 |---|---|---|
 | Verification instrument | `PostToolBatch` (one write per batch) | **`PostToolUse`** — Codex has no `PostToolBatch` event |
+| Compaction archive | `PostCompact` | `PostCompact` through the same archiver, with Codex live payload shape still unverified |
 | Plugin root | `${CLAUDE_PLUGIN_ROOT}` | `${TWIN_SPARROW_ADAPTER_ROOT}` (you set it; no built-in var) |
 | Host selection | default | `TWIN_SPARROW_HOST=codex` (prefixed in each command) |
 | First-turn contract | `SessionStart` hook | `AGENTS.md` (plus the `SessionStart` hook) |
 
-Event names (`SessionStart`, `UserPromptSubmit`, `PostToolUse`, `Stop`) and the
-`{hookSpecificOutput.additionalContext}` / `{decision:"block",reason}` output
-shapes are identical to Claude — verified against a live `~/.codex/hooks.json`.
+Event names (`SessionStart`, `UserPromptSubmit`, `PostToolUse`, `PostCompact`, `Stop`) use the
+same local hooks.json-contract parser. Local simulated tests pass; live Codex validation remains tracked in
+`../docs/LIVE_HOOK_VALIDATION.md`.
 
 ## Setup
 
@@ -38,7 +39,7 @@ shapes are identical to Claude — verified against a live `~/.codex/hooks.json`
    TWIN_SPARROW_ADAPTER_ROOT = "/absolute/path/to/twin-sparrow-claude-adapter"
    ```
 
-4. **Install the hooks.** Codex reads `~/.codex/hooks.json`. **Merge** the four
+4. **Install the hooks.** Codex reads `~/.codex/hooks.json`. **Merge** the five
    entries from `codex/hooks.json` into your existing `~/.codex/hooks.json`
    (append to each event's array — Codex runs every hook in a group; do not
    overwrite hooks other tools installed). Codex will prompt to trust the new
@@ -77,5 +78,10 @@ may not reach the adapter. To trust stale-verification enforcement under Codex,
 either broaden the hook wiring if Codex supports it, or capture live evidence that
 non-Bash mutation tools are delivered to a configured hook.
 
-Track both items in `../docs/LIVE_HOOK_VALIDATION.md` before promoting Codex from
+**[Hypothesis]** Codex `PostCompact` is wired locally, but the live payload field
+names are not yet captured. The parser accepts `compact_summary`, `compactSummary`,
+and `summary`; capture one real Codex `PostCompact` payload before promoting this
+from local/simulated support to live-validated support.
+
+Track these items in `../docs/LIVE_HOOK_VALIDATION.md` before promoting Codex from
 local/simulated support to live-validated support.

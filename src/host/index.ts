@@ -24,4 +24,12 @@ export function resolveHost(env: NodeJS.ProcessEnv = process.env): AgentHostPort
 }
 
 export { claudeHost, codexHost };
-export type { AgentHostPort, HostId, StopSignal, SessionStartSignal, TwinDecision } from "./host-port.js";
+export type {
+  AgentHostPort,
+  CompactSummarySignal,
+  CompactTrigger,
+  HostId,
+  SessionStartSignal,
+  StopSignal,
+  TwinDecision,
+} from "./host-port.js";

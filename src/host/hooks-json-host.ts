@@ -1,6 +1,8 @@
 import type { BashToolObservation, ToolObservation } from "../hooks/verification-instrument-core.js";
 import type {
   AgentHostPort,
+  CompactSummarySignal,
+  CompactTrigger,
   ContextOutput,
   HostContextEvent,
   HostId,
@@ -149,6 +151,26 @@ function extractSessionStart(payload: unknown): SessionStartSignal {
   };
 }
 
+// ---- PostCompact -------------------------------------------------------------
+
+function normalizeCompactTrigger(value: unknown): CompactTrigger {
+  if (value === "manual" || value === "auto") return value;
+  return "unknown";
+}
+
+function extractCompactSummary(payload: unknown): CompactSummarySignal | null {
+  if (!isRecord(payload)) return null;
+  const summary = stringField(payload, ["compact_summary", "compactSummary", "summary"]);
+  if (summary === null) return null;
+  const sessionId = stringField(payload, ["session_id", "sessionId"]);
+  const trigger = normalizeCompactTrigger(valueField(payload, ["trigger", "compact_trigger", "compactTrigger"]));
+  return {
+    summary,
+    trigger,
+    ...(sessionId ? { sessionId } : {}),
+  };
+}
+
 // ---- output rendering --------------------------------------------------------
 
 function renderContext<E extends HostContextEvent>(event: E, additionalContext: string): ContextOutput<E> {
@@ -176,6 +198,7 @@ export function createHooksJsonHost(id: HostId, overrides: Partial<AgentHostPort
     extractBashObservations,
     extractStop,
     extractSessionStart,
+    extractCompactSummary,
     renderContext,
     renderDecision,
   };

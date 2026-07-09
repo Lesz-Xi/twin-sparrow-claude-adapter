@@ -34,6 +34,16 @@ function codexStop(active: boolean): string {
   });
 }
 
+function codexPostCompact(summary: string): string {
+  return JSON.stringify({
+    hook_event_name: "PostCompact",
+    session_id: "s",
+    turn_id: "t",
+    trigger: "manual",
+    compact_summary: summary,
+  });
+}
+
 test("resolveHost selects the Codex host when requested", () => {
   assert.equal(resolveHost({ TWIN_SPARROW_HOST: "codex" }).id, "codex");
 });
@@ -54,6 +64,12 @@ test("Codex host parses the documented Codex payload shapes", () => {
   assert.deepEqual(codexHost.extractSessionStart(codexHost.parsePayload(JSON.stringify({ source: "startup", session_id: "s" }))), {
     sessionId: "s",
     source: "startup",
+  });
+
+  assert.deepEqual(codexHost.extractCompactSummary(codexHost.parsePayload(codexPostCompact("codex compact"))), {
+    summary: "codex compact",
+    trigger: "manual",
+    sessionId: "s",
   });
 });
 

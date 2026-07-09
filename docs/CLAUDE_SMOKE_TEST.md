@@ -10,12 +10,13 @@ This document defines the first live Claude validation protocol for the Twin-Spa
 
 Local TypeScript behavior is test-covered. Live Claude behavior is not yet proven. The cross-host claim boundary and pass/fail matrix live in [LIVE_HOOK_VALIDATION.md](LIVE_HOOK_VALIDATION.md).
 
-The smoke test must answer four questions:
+The smoke test must answer five questions:
 
 1. Does Claude execute the plugin hooks from `hooks/hooks.json` after loading `.claude-plugin/plugin.json` metadata?
 2. Does `additionalContext` from hook stdout actually enter Claude's model context?
 3. Does local adapter state persist across a real Claude session?
-4. Can the operator inspect adapter state through `/twin-status` or the executable status target?
+4. Does `PostCompact` archive host-produced compact summaries into the raw compaction log?
+5. Can the operator inspect adapter state through `/twin-status` or the executable status target?
 
 Until those are observed, do **not** claim that the adapter works in live Claude.
 
@@ -59,8 +60,8 @@ npm run test
 Expected local result at the current architecture slice:
 
 ```text
-# tests 79
-# pass 79
+# tests 86
+# pass 86
 # fail 0
 ```
 
@@ -70,6 +71,7 @@ Build artifacts expected after test/build:
 dist/src/hooks/twin-session-start.js
 dist/src/hooks/twin-turn-router.js
 dist/src/hooks/twin-posttoolbatch-instrument.js
+dist/src/hooks/twin-postcompact-archiver.js
 dist/src/hooks/twin-verification-gate.js
 dist/src/commands/twin-status.js
 ```
@@ -153,7 +155,28 @@ Failure interpretation:
 - missing `additionalContext` → adapter output contract mismatch
 - no ledger → state directory/write issue
 
-### 3. `/twin-status` executable target
+### 3. PostCompact executable
+
+```bash
+export TWIN_SPARROW_MEMORY_DIR="/tmp/twin-sparrow-claude-smoke/memory/compaction-log"
+echo '{"hookEventName":"PostCompact","session_id":"smoke-session","trigger":"manual","compact_summary":"Smoke compact summary"}' \
+  | node dist/src/hooks/twin-postcompact-archiver.js
+```
+
+Expected evidence:
+
+- stdout is `{}`
+- a markdown file exists under `$TWIN_SPARROW_MEMORY_DIR`
+- frontmatter contains `kind: "compaction-summary"`, `host: "claude"`, `trigger: "manual"`, and `session_id: "smoke-session"`
+- ledger contains a `compaction_archived` event beside the adapter state file
+
+Failure interpretation:
+
+- no file → archive directory resolution or safe-write failure
+- malformed frontmatter → archive formatter bug
+- no ledger event → telemetry/write-path issue
+
+### 4. `/twin-status` executable target
 
 From the adapter repo root:
 

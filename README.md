@@ -45,6 +45,7 @@ Twin-Sparrow should feel present inside Claude while Claude receives only the sm
 | **Token economics** | Estimates-only ledger — no unproven savings claims |
 | **Skill gates** | Fail-closed hydration of the allowlisted Twin-Sparrow skill inventory |
 | **Verification gate** | Blocks same-turn closure on open/stale proof obligations; obligations close only when runner-shaped verification commands report pass evidence; later mutations stale prior code verification |
+| **Compaction archive** | Archives `PostCompact` summaries as raw markdown logs under `compaction-log/`, with safe no-overwrite writes and ledger receipts |
 | **Multi-host core** | Hook I/O normalized behind a host port; the same compiled core runs under Claude Code and Codex CLI |
 
 ## Current status
@@ -56,13 +57,15 @@ Initial runnable adapter skeleton implemented — the runtime plumbing and every
 - `PostToolBatch` (Claude) / `PostToolUse` (Codex) verification instrument and `Stop` verification gate —
   the retrospective "catch" layer: same-turn obligations close only on runner-shaped pass evidence, and
   closure is blocked until they do; later mutations stale prior code verification (loop-bounded — see [docs/VERIFICATION_GATE_HANDOFF.md](docs/VERIFICATION_GATE_HANDOFF.md))
+- `PostCompact` compaction archiver — persists host-produced compact summaries verbatim as raw memory logs under
+  `~/.twin-sparrow/agent/memory/compaction-log/` by default, or `TWIN_SPARROW_MEMORY_DIR` when overridden
 - `src/host/` — a host port (`AgentHostPort`) that normalizes hook payloads and output rendering;
   `claudeHost` and `codexHost` are both thin instances of the shared hooks.json-contract implementation
   (see [Multi-host architecture](#multi-host-architecture-claude-code--codex-cli))
 - safe JSON state store and append-only JSONL session ledger
 - six runtime capsules from [Capabilities](#capabilities-at-a-glance); the verification gate is a Stop-hook/runtime catch layer, not a per-turn capsule
 - read-only `/twin-status` operator command target
-- Node test fixtures (79 passing), `docs/HONEST_NUMBERS.md`, `docs/CLAUDE_SMOKE_TEST.md`, and `docs/LIVE_HOOK_VALIDATION.md`
+- Node test fixtures (86 passing), `docs/HONEST_NUMBERS.md`, `docs/CLAUDE_SMOKE_TEST.md`, and `docs/LIVE_HOOK_VALIDATION.md`
 
 Verify locally:
 
@@ -82,7 +85,7 @@ arrives on stdin and how context/decisions are rendered back — is host-specifi
 seam is isolated in `src/host/`:
 
 - **`src/host/host-port.ts`** — the `AgentHostPort` interface every host implements
-  (parse payload, extract prompt/tool observations/Bash observations/Stop signal, render context/decision).
+  (parse payload, extract prompt/tool observations/Bash observations/Stop/SessionStart/PostCompact signals, render context/decision).
 - **`src/host/hooks-json-host.ts`** — the shared implementation of the `hooks.json` contract
   (JSON on stdin, `{hookSpecificOutput.additionalContext}` / `{decision:"block",reason}` on stdout)
   that Claude Code and Codex CLI both use.
@@ -100,9 +103,10 @@ pointing `TWIN_SPARROW_ADAPTER_ROOT` at this repo, merging `codex/hooks.json` in
 
 **Open verification**: local simulated hook tests pass, but live host behavior is not yet fully validated.
 The remaining claim boundary is tracked in [docs/LIVE_HOOK_VALIDATION.md](docs/LIVE_HOOK_VALIDATION.md).
-Two Codex details especially require live evidence before relying on production claims: the inner shape of
-Codex's Bash `tool_response` payload, and whether non-Bash mutation tools are observable with the current
-`PostToolUse` hook matcher. See [codex/README.md](codex/README.md#open-verification-do-before-trusting-obligation-closing).
+Three Codex details especially require live evidence before relying on production claims: the inner shape of
+Codex's Bash `tool_response` payload, whether non-Bash mutation tools are observable with the current
+`PostToolUse` hook matcher, and the live `PostCompact` payload shape. See
+[codex/README.md](codex/README.md#open-verification-do-before-trusting-obligation-closing).
 
 ## Claude Desktop MCP launcher
 

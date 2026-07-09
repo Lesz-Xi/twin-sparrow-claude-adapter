@@ -25,6 +25,15 @@ export interface SessionStartSignal {
   readonly source?: string;
 }
 
+export type CompactTrigger = "manual" | "auto" | "unknown";
+
+/** Normalized PostCompact signal, host-agnostic. */
+export interface CompactSummarySignal {
+  readonly summary: string;
+  readonly trigger: CompactTrigger;
+  readonly sessionId?: string;
+}
+
 /** A host-neutral turn decision the core produces; the host renders it to wire JSON. */
 export type TwinDecision =
   | { readonly kind: "allow" }
@@ -61,6 +70,9 @@ export interface AgentHostPort {
 
   /** Extract the normalized SessionStart signal (session id + start source). */
   extractSessionStart(payload: unknown): SessionStartSignal;
+
+  /** Extract the normalized PostCompact signal (summary + trigger + session id). */
+  extractCompactSummary(payload: unknown): CompactSummarySignal | null;
 
   /** Render a context-injection output for the given lifecycle event. */
   renderContext<E extends HostContextEvent>(event: E, additionalContext: string): ContextOutput<E>;

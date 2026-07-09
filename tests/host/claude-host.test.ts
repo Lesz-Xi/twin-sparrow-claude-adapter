@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { claudeHost, resolveHost } from "../../src/host/index.js";
 import {
   documentedBashSuccessResponse,
+  postCompactFixture,
   postToolBatchFixture,
   postToolUseBashFixture,
   stopHookFixture,
@@ -49,6 +50,29 @@ test("Claude host collects only Bash observations from a mixed batch", () => {
     observations.map((o) => o.command),
     ["npm test", "npm run lint"],
   );
+});
+
+test("Claude host normalizes PostCompact summaries", () => {
+  assert.deepEqual(claudeHost.extractCompactSummary(claudeHost.parsePayload(postCompactFixture("compact body", "manual"))), {
+    summary: "compact body",
+    trigger: "manual",
+    sessionId: "test-session",
+  });
+  assert.deepEqual(
+    claudeHost.extractCompactSummary(
+      claudeHost.parsePayload(JSON.stringify({ compactSummary: "camel body", sessionId: "camel-session", trigger: "auto" })),
+    ),
+    {
+      summary: "camel body",
+      trigger: "auto",
+      sessionId: "camel-session",
+    },
+  );
+  assert.deepEqual(claudeHost.extractCompactSummary(claudeHost.parsePayload(JSON.stringify({ compact_summary: "x", trigger: "other" }))), {
+    summary: "x",
+    trigger: "unknown",
+  });
+  assert.equal(claudeHost.extractCompactSummary(claudeHost.parsePayload(JSON.stringify({ trigger: "manual" }))), null);
 });
 
 test("Claude host normalizes the Stop signal", () => {

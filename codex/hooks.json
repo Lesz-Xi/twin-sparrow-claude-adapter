@@ -35,6 +35,17 @@
         ]
       }
     ],
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "TWIN_SPARROW_HOST=codex node \"${TWIN_SPARROW_ADAPTER_ROOT}/dist/src/hooks/twin-postcompact-archiver.js\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [

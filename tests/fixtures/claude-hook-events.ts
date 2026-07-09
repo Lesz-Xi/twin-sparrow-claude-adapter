@@ -39,6 +39,15 @@ export function stopHookFixture(stopHookActive: boolean): string {
   });
 }
 
+export function postCompactFixture(summary: string, trigger: "manual" | "auto" | "unknown" = "manual"): string {
+  return JSON.stringify({
+    hookEventName: "PostCompact",
+    session_id: "test-session",
+    trigger,
+    compact_summary: summary,
+  });
+}
+
 export function postToolUseBashFixture(command: string, toolResponse: unknown): string {
   return JSON.stringify({
     hookEventName: "PostToolUse",

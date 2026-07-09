@@ -284,10 +284,6 @@ Use FPT first to identify constraints, then `/represent` to design the encoding.
 
 Oppus enforces reasoning discipline. Pearl representation can be applied as one component of an Oppus analysis — specifically as a way to audit whether the reasoning's representational assumptions are sound.
 
-### crucible-doctrine
-
-Crucible designs causal interfaces. Pearl representation is the theoretical foundation for Crucible's interface design choices. Every Crucible screen, panel, or cognitive tool is a representation choice. This skill is the method for auditing and designing those choices.
-
 ---
 
 ## Anti-Patterns

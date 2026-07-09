@@ -29,10 +29,10 @@ function commandsFor(hooks: HooksJson, event: string): readonly string[] {
   return (hooks.hooks?.[event] ?? []).flatMap((group) => (group.hooks ?? []).map((leaf) => leaf.command ?? ""));
 }
 
-test("codex/hooks.json wires the four Codex-supported events", () => {
+test("codex/hooks.json wires the Codex-supported events used by Twin-Sparrow", () => {
   const hooks = readCodexHooks();
   const events = Object.keys(hooks.hooks ?? {}).sort();
-  assert.deepEqual(events, ["PostToolUse", "SessionStart", "Stop", "UserPromptSubmit"]);
+  assert.deepEqual(events, ["PostCompact", "PostToolUse", "SessionStart", "Stop", "UserPromptSubmit"]);
 });
 
 test("codex/hooks.json uses PostToolUse (not PostToolBatch, which Codex lacks)", () => {
@@ -46,7 +46,7 @@ test("codex/hooks.json uses PostToolUse (not PostToolBatch, which Codex lacks)",
 test("every codex hook selects the codex host and the adapter root", () => {
   const hooks = readCodexHooks();
   const allCommands = Object.keys(hooks.hooks ?? {}).flatMap((event) => commandsFor(hooks, event));
-  assert.equal(allCommands.length, 4);
+  assert.equal(allCommands.length, 5);
   for (const command of allCommands) {
     assert.match(command, /TWIN_SPARROW_HOST=codex/, `host env missing in: ${command}`);
     assert.match(command, /\$\{TWIN_SPARROW_ADAPTER_ROOT\}/, `adapter root missing in: ${command}`);
@@ -60,6 +60,7 @@ test("codex hooks point at compiled dist hooks that exist", () => {
     SessionStart: "dist/src/hooks/twin-session-start.js",
     UserPromptSubmit: "dist/src/hooks/twin-turn-router.js",
     PostToolUse: "dist/src/hooks/twin-posttooluse-instrument.js",
+    PostCompact: "dist/src/hooks/twin-postcompact-archiver.js",
     Stop: "dist/src/hooks/twin-verification-gate.js",
   };
   for (const [event, rel] of Object.entries(expected)) {

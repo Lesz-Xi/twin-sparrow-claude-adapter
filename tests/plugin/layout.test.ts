@@ -19,6 +19,7 @@ test("Claude plugin layout keeps metadata and hooks in observed Claude Code shap
       readonly UserPromptSubmit?: readonly unknown[];
       readonly PostToolUse?: readonly unknown[];
       readonly PostToolBatch?: readonly unknown[];
+      readonly PostCompact?: readonly unknown[];
       readonly Stop?: readonly unknown[];
     };
   };
@@ -32,9 +33,11 @@ test("Claude plugin layout keeps metadata and hooks in observed Claude Code shap
   assert.ok(Array.isArray(hooks.hooks?.UserPromptSubmit));
   assert.equal(hooks.hooks?.PostToolUse, undefined);
   assert.ok(Array.isArray(hooks.hooks?.PostToolBatch));
+  assert.ok(Array.isArray(hooks.hooks?.PostCompact));
   assert.ok(Array.isArray(hooks.hooks?.Stop));
   assert.match(JSON.stringify(hooks), /twin-session-start\.js/);
   assert.match(JSON.stringify(hooks), /twin-turn-router\.js/);
   assert.match(JSON.stringify(hooks), /twin-posttoolbatch-instrument\.js/);
+  assert.match(JSON.stringify(hooks), /twin-postcompact-archiver\.js/);
   assert.match(JSON.stringify(hooks), /twin-verification-gate\.js/);
 });
