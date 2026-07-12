@@ -1,276 +1,196 @@
 ---
 name: japanese-design
 description: >
-  Apply Japanese design doctrine, reference grounding, typography, spacing, restraint, motion, and visual-system critique for product and UI work.
+  Apply Japanese design doctrine grounded in Kenya Hara (ex-formation) and the Relics
+  living web specimen: ma, shibui, typography, spacing, restraint, motion character,
+  and surface critique. Use for product/UI surface work under Twin-Sparrow hierarchy.
 ---
 
 # Japanese Design
 
 Current name: `japanese-design`.
 
-This skill guides design critique, design planning, UI restyling, frontend implementation guidance, and design-system synthesis using a restrained Japanese-adjacent doctrine:
+> A shibui editorial doctrine: European archival monograph structure infused with Japanese principles of ma, quiet materiality, and craft restraint — operated through **Hara’s ex-formation**, proven on the web by **Relics**.
 
-> A shibui editorial doctrine: European archival monograph structure infused with Japanese principles of ma, quiet materiality, stillness, and craft restraint.
+> **Hara decides what we remove. Relics shows what remains when Twin-Sparrow is honest on the web.**
 
-The skill is not a generic inspiration-board picker. It is a production design guidance skill grounded in:
+This skill is production surface guidance — not a generic inspiration board and not Japan motif cosplay.
 
-1. Visual Doctrine: `/Users/lesz/Downloads/Visual-Doctrine/handoff/visual-doctrine-deep-handoff.md`
-2. Aura design-system synthesis: `references/aura-design-system-synthesis.md`
-3. Visual Doctrine grounding summary: `references/visual-doctrine-grounding.md`
-4. Japanese-design pressure triad: `references/japanese-reference-triad.md`
-5. Impeccable motion synthesis: `references/impeccable-motion-synthesis.md`
-6. Reasoning and options protocol: `references/reasoning-options-protocol.md`
-7. Japanese modern font guidance: `references/japanese-modern-fonts.md`
-8. Interactive doctrine lessons: `references/interactive-doctrine-lessons.md`
-9. Narrow external reference corpus: Cursor, ElevenLabs, Mistral.ai, Vercel, Warp
+## Grounding (real files)
+
+Load only what the task needs. Paths relative to this skill unless absolute.
+
+| Priority | Source | Path |
+|----------|--------|------|
+| 1 | Hara / ex-formation | `references/hera-doctrine.md` |
+| 2 | Relics living specimen | `references/relics-language.md` |
+| 3 | Relics motion numbers | `references/motion-relics.md` |
+| 4 | One-page always-obey | `references/surface-grounding.md` |
+| 5 | Paths / URLs | `references/source-catalog.md` |
+| Optional | Visual Doctrine deep | `/Users/lesz/Downloads/Visual-Doctrine/handoff/visual-doctrine-deep-handoff.md` **if present** |
+
+**Do not invent missing Aura/Visual-Doctrine reference files.** If optional paths are absent, continue with Hara + Relics.
+
+Relics is Twin-Sparrow’s own web specimen (`https://relics.quest`) — **not** an external style costume. Extract **mechanisms**, never require cloning the kinetic deck or page structure onto unrelated work.
+
+## Hierarchy
+
+```
+think-different (representation)
+  → product-design (function)
+    → japanese-design (surface)   ← this skill
+      → web-design (craft)
+twin-sparrow-taste (identity) cuts across
+```
+
+This skill decides **how it feels**: ma, type voice, material, motion character, restraint.
+`web-design` implements numbers and wiring and never overrides surface.
+`product-design` owns value order and the primary action.
 
 ## Core Doctrine
 
 Design should feel like truth becoming usable:
 
-- **Felt** as atmosphere, material, silence, light, and pacing.
-- **Tested** as structure, causality, constraint, and legible systems.
-- **Built** as instrument, craft, interface, and trustworthy motion.
+- **Felt** as atmosphere, material, silence, light, pacing.
+- **Tested** as structure, causality, constraint, legible systems.
+- **Built** as instrument, craft, interface, trustworthy motion.
 
 Do not make interfaces merely stylish. Make them behave like authored instruments.
 
+### Hara method (always for surface polish)
+
+1. Inventory assumptions
+2. Remove non-essential explanation and noise
+3. Create receptive space (ma)
+4. Test for aliveness
+
+Full checklist: `references/hera-doctrine.md`.
+
 ## Representation Pre-Pass
 
-For broad design planning, page redesigns, product pages, landing pages, portfolio pages, cinematic pages, or feature-heavy interfaces, identify the page's representation before applying visual doctrine.
+Before surface polish on broad pages, identify representation:
 
-Ask:
+1. Inherited representation?
+2. Better representation?
+3. Product/page soul (one sentence that cuts)?
+4. What to remove?
+5. What surface doctrine follows?
 
-1. **What is the inherited representation?**
-   - brochure, dashboard, gallery, configurator, article, archive, instrument, showroom, dealer page, feature stack, etc.
-2. **What is the better representation?**
-   - editorial issue, cinematic sequence, quiet instrument, product ritual, proof surface, decision workspace, photographic monograph, etc.
-3. **What is the product/page soul?**
-   - one sentence that can decide what belongs and what should be cut.
-4. **What should be removed?**
-   - duplicate sections, exposed scaffolding, generic feature blocks, decorative motion, dealership copy, unsupported luxury clichés, etc.
-5. **What visual doctrine follows from that soul?**
-   - ma, shibui, materiality, typography, rhythm, motion, image treatment, surface logic, section pacing, and interaction restraint.
+Route to `think-different` when soul/category is unclear. Do not polish surface before representation is clear.
 
-Use `/think-different` first when the real issue is product soul, narrative spine, category collapse, feature-stack bloat, or deciding what the page is. Use `japanese-design` to make that representation visible through atmosphere, structure, type, spacing, motion, and implementation discipline.
+## Japanese-Adjacent Principles (structural, not costume)
 
-Use `web-design` below this skill for craft execution: layout grids, motion tokens, reveal techniques, and page assembly. The hierarchy is representation (`think-different`) → function (`product-design`) → surface (`japanese-design`) → craft (`web-design`). This skill decides surface doctrine; `web-design` implements it and never overrides it.
+No decorative Japan motifs, Zen clichés, red-circle symbolism, or shoji/tatami cosplay unless the product explicitly calls for it.
 
-Do not apply Japanese-design polish before the representation is clear.
+| Principle | Rule |
+|-----------|------|
+| **Ma** | Space is active. Do not fill gaps because they exist. |
+| **Shibui** | Beauty arrives slowly; one accent; low noise. |
+| **Wabi-sabi** | Material truth; authored, not sterile. |
+| **Seijaku** | Interaction deepens attention; never performs for it. |
+| **Kanso** | Only what carries meaning or function. |
+| **Fukinsei** | Living asymmetry (e.g. 7/5) over equal portfolio grids. |
 
-## Japanese-Adjacent Principles
+## Pressure triad (secondary)
 
-This skill must not create superficial Japanese-themed design. No decorative Japan-coded motifs, Zen clichés, red-circle symbolism, shoji/tatami cosplay, or ornamental cultural borrowing unless the product context explicitly calls for it.
-
-Use the principles structurally:
-
-### Ma — meaningful interval
-
-Space is active. Margins, pauses, hidden states, section rhythm, and quiet layout intervals are not empty leftovers. They are the perceptual field where meaning forms.
-
-Rule: preserve emptiness as structure. Do not fill space merely because space is available.
-
-### Shibui / Shibusa — quiet refinement
-
-Beauty should arrive slowly. Prefer restrained palettes, disciplined type, muted contrast, and low-noise hierarchy over instantly loud effects.
-
-Rule: if a visual choice announces itself before it serves the system, reduce it.
-
-### Wabi-sabi — material truth over sterile perfection
-
-Let age, texture, grain, asymmetry, patina, and imperfect material evidence remain visible where appropriate. Avoid over-cleaning interfaces into sterile sameness.
-
-Rule: let the work feel handled, authored, and real, but never careless.
-
-### Supporting affinities
-
-- **Seijaku:** interaction should deepen attention, not perform for attention.
-- **Kanso:** remove anything that does not strengthen the doctrine.
-- **Shizen:** let structure feel discovered from constraints, not imposed as decoration.
-- **Craft discipline:** every component, image, caption, motion curve, and surface must earn its place.
-
-## Japanese-Design Pressure Triad
-
-Linear, Capture One, and Karimoku are built into this skill as doctrine pressure references, not selectable style costumes.
-
-Use them this way:
-
-- **Linear** → structural intelligence, operational clarity, dense systems made breathable.
-- **Capture One** → photographic instrumentality, professional image workflow, visual assets as working material.
-- **Karimoku** → material soul, Japanese craft restraint, wood-like warmth, quality-first tactility.
-
-Combined brief:
-
-> Linear's structural intelligence, Capture One's photographic instrumentality, and Karimoku's material soul — held inside a quiet philosophical archive.
-
-Do not turn the work into a Linear SaaS page, a Capture One plugin marketplace, or a Karimoku furniture catalogue. These references deepen Visual Doctrine; they do not replace it.
+Linear (structure), Capture One (photographic instrumentality), Karimoku (material soul) — **pressure**, not costumes. They deepen doctrine; they do not replace Hara or Relics.
 
 ## External Reference Scope
 
-Only these external design references are supported:
+Supported external styles only: `cursor`, `elevenlabs`, `mistral.ai`, `vercel`, `warp`.
 
-- `cursor`
-- `elevenlabs`
-- `mistral.ai`
-- `vercel`
-- `warp`
+### Mandatory gate (external only)
 
-Removed references must not be offered, loaded, compared, or treated as supported by this skill.
-
-## Mandatory Gate
-
-Before reading any external style-specific reference, ask the user:
+Before reading any external style-specific `DESIGN.md` / preview:
 
 `Which design reference should I use for this task: cursor, elevenlabs, mistral.ai, vercel, or warp?`
 
-Enforce these rules:
-
-- Ask first on every external-reference invocation.
-- Ask first even if the user already named a style in the same message.
-- Do not infer, auto-pick, or continue from context alone.
-- Do not read any external style-specific `DESIGN.md`, `README.md`, `preview.html`, or `preview-dark.html` until the user confirms the reference.
-- If the user asks for synthesis from Visual Doctrine or Aura only, do not ask for an external reference; load the doctrine files directly.
-- If the user gives an unsupported style, ask them to pick from the five supported references.
+- Ask every external-reference invocation.
+- Do not auto-pick.
+- **Doctrine-first work (Hara, Relics, Visual Doctrine if present) does not require this gate.**
 
 ## Loading Order
 
-### Doctrine-first work
+### Doctrine-first (default for Twin-Sparrow surface)
 
-For Aura, Visual Doctrine, Japanese-design grounding, motion doctrine, option-setting, or system-principle synthesis:
-
-1. Read `/Users/lesz/Downloads/Visual-Doctrine/handoff/visual-doctrine-deep-handoff.md` when full fidelity is needed.
-2. Read `references/visual-doctrine-grounding.md` for compact doctrine rules.
-3. Read `references/japanese-reference-triad.md` when Linear, Capture One, and Karimoku should inform the design pass.
-4. Read `references/aura-design-system-synthesis.md` for Aura-specific tokens, layout, screenshots, motion, interaction principles, and System-Layout architecture.
-5. Read `references/japanese-modern-fonts.md` for typography choices that should carry Japanese-adjacent atmosphere through letterform rather than decorative motifs.
-6. Read `references/interactive-doctrine-lessons.md` for interactive-page lessons on heading rhythm, hover states, card reveal timing, framed panel gutters, and non-generic status labels.
-7. Read `references/impeccable-motion-synthesis.md` for animation, micro-interaction, transition, overdrive, or motion-performance work.
-8. Read `references/reasoning-options-protocol.md` for system-design choices, motion-direction choices, audits, critiques, or high-stakes design planning.
-9. Read source Aura files or screenshots only when updating the synthesis or verifying a claim.
+1. `references/surface-grounding.md`
+2. `references/hera-doctrine.md`
+3. `references/relics-language.md` when web / public taste / layout / interaction
+4. `references/motion-relics.md` when motion / animation / scroll
+5. Optional Visual Doctrine path **if present** and full archival fidelity needed
+6. `references/source-catalog.md` when resolving paths
 
 ### External-reference work
 
-After the user confirms one of the five supported references:
-
-1. Read that style's `DESIGN.md` first.
-2. Read that style's `README.md` only if concise context, caveats, or preview summary are needed.
-3. Read `preview.html` or `preview-dark.html` only if visual confirmation is needed.
-
-Use `references/source-catalog.md` for exact absolute paths.
-
-Do not load multiple external references unless the user explicitly asks for comparison.
-
-## Use Cases
-
-Use this skill to:
-
-- critique an interface against Visual Doctrine and Aura principles
-- synthesize a design system from screenshots, layout files, and context
-- plan a redesign or restyle with concrete visual direction
-- guide frontend implementation details: typography, spacing, color, surface, layout, motion, and interaction tone
-- translate Visual Doctrine into prompts, specs, or implementation guidance
-- tune motion design so it feels physical, architectural, restrained, and instrument-like
-- select Japanese-adjacent typography that expresses ma, shibui, wabi-sabi, legibility, and craft without cultural costume
-- redesign generic UI elements into doctrine-specific interactive surfaces: quiet nav states, authored status labels, aligned card reveals, and monograph-like framed panels
-- generate 2–4 doctrine-compatible options for system design, motion direction, animation style, or visual architecture before implementation
-- compare one supported external reference against the Visual Doctrine baseline
-- apply the Linear / Capture One / Karimoku pressure triad without copying their surface styles
-
-### shadcn / `@twin` Registry Use Cases
-
-Use the `@twin` shadcn registry when Japanese-design guidance needs installable primitives rather than abstract surface direction.
-
-Concise use cases:
-
-- `@twin/aura-tokens` — apply ma, shibui, restraint, and Aura surface rules through semantic shadcn-compatible tokens.
-- `@twin/tui-panel` — use a terminal-native Card/Panel analogue for quiet TUI surfaces.
-- `@twin/button` — define restrained primary/secondary action behavior across web and TUI.
-- `@twin/product-page-spine` — compose with `/product-design` when surface needs to follow promise → proof → mechanism → action.
-
-Operational rule: use shadcn as registry, token vocabulary, and implementation grammar. Do not treat shadcn as the visual doctrine, and do not install React shadcn components into `packages/tui`.
-
-The local registry server must be running for `@twin/...` commands unless the registry is later hosted permanently:
-
-```bash
-npm run registry:serve
-```
-
-## Non-Goals / Do Not Invoke
-
-Do not invoke this skill for minor implementation polish that only touches existing tokens, labels, copy, spacing nits, or already-established style rules.
-
-Examples that should not trigger this skill by themselves:
-
-- "make this label follow Main View Foreground"
-- "minor polish"
-- "wire this to the existing token"
-- "small color variable fix"
-- "use the existing foreground/background/accent token"
-
-For those tasks, execute directly with normal engineering/tool discipline.
+After user confirms one of the five: read that style’s `DESIGN.md` first, then README/preview only if needed. Do not load multiple unless comparison is requested.
 
 ## Working Rules
 
-- Visual Doctrine is the baseline, not a style garnish.
-- Aura's design system should feel like an instrument: precise, calm, tactile, and trustworthy.
-- Preserve the distinction between direct source facts, implementation inference, and imaginative direction.
-- Prefer editorial asymmetry over generic uniform cards when the interface is expressive or conceptual.
-- Prefer system clarity over decorative atmosphere when the interface is operational.
-- Use external references as pressure references, not style costumes.
-- Use Linear for operational intelligence, Capture One for photographic instrumentality, and Karimoku for material craft restraint.
-- Keep motion restrained unless the product purpose demands expressivity.
-- Do not use glassmorphism, glow, neon, cyberpunk, shiny luxury gold, or generic SaaS spectacle unless explicitly asked and justified.
-- Do not make everything rounded. Radius must communicate material logic.
-- Use Japanese modern fonts as structural voice: Shippori Mincho for editorial gravity, Zen Kaku Gothic New for legible modern UI, Klee One only as a sparse human accent, with M PLUS 1p and Noto Serif JP as useful alternates/fallbacks.
-- H1/H2/H3 and other major headings should carry the Japanese typographic voice directly; avoid overly Western compression, giant luxury-serif drama, or default italic editorial styling unless semantically earned.
-- Hover states should feel like seijaku: quiet attention, restrained ink shifts, and hairline reveals. Avoid generic rounded hover pills, decorative dots, and dashboard-tab behavior unless the component's function demands it.
-- Cards and monograph panels must obey ma: reveal supporting cards only when they align with the reading rhythm, and keep text away from frame lines, rules, and instrument dividers through generous gutters.
-- Status labels and mode markers should feel authored and doctrine-specific, not like generic badges. Prefer instrument-like labels and monograph construction over capsule UI.
-- Do not compress meaningful silence. Space is part of the system.
-- When Chief gives concrete taste references, synthesize the mechanisms, not the surface costume: representation from the strongest structural source, atmosphere from the strongest sensory source, and motion grammar from the strongest interaction source.
-- If a desired atmospheric effect is externally hosted, opaque, or not controllable enough to recolor/adapt safely, rebuild a local authored approximation rather than depending on the remote scene. Preserve the feeling; do not pretend to control what cannot be controlled.
-- Warmth can be structural, not decorative: sun/tangerine accents should behave as evidence of life, hover, state, and material tactility rather than generic orange branding.
+- Run ex-formation before decoration.
+- Prefer hairlines and tone over boxes and elevation.
+- Prefer 7/5 and editorial asymmetry over uniform SaaS cards when expressive.
+- One accent on Relics-class web (sage); status color carries meaning on instruments.
+- Type: Shippori Mincho (prose gravity), Zen Kaku Gothic New (body/UI), display serif for headlines, mono for labels; Klee One only as sparse human accent.
+- Hover = seijaku: ink shift, hairline reveal, quiet logo lift — not rounded pills or dashboard tabs.
+- Cards = proof plates: ma, gutters, hairline under copy; no resting float-shadow theater.
+- Kinetic / floating objects: depth from structure (stack, hairline); no drop-shadow under Relics front cards.
+- Motion: explains hierarchy; soft blur only as **scrub recede**; never blur-in.
+- Proof is real or absent.
+- Space is no glassmorphism, glow, neon, or Japan motif cosplay.
+- Mechanisms over costume when citing Relics or external pressure.
+- Greyscale + motion-off must still work.
 
-## Reasoning and Options Protocol
+## Relics-Derived Surface Operations
 
-For non-trivial design work, especially system architecture, motion architecture, animation direction, critiques, audits, or broad restyles, use the local reasoning protocol in `references/reasoning-options-protocol.md`.
+These operations are available when they improve comprehension or felt continuity. They are not mandatory page furniture.
 
-Default behavior:
+| Operation | Surface rule | Boundary |
+|-----------|--------------|----------|
+| **Trace ledger** | One quiet ledger; one active hairline; context → orientation → action → verification | Never status-card chrome, fake telemetry, or exposed chain-of-thought |
+| **Causal handoff** | Let one structural edge carry continuity between adjacent representations | Motion must explain connection; no pin, loop, or spectacle |
+| **Authored marginalia** | One dated, narrow field note with generous ma | Maintain it honestly or remove it; never a fake activity feed |
+| **Terminal clarity** | Footers, final controls, and terminal evidence stay crisp and still | Do not scrub content that cannot complete the reading-band motion |
+| **Truthful specimen** | Prefer real product material over generic architectural placeholders | Self-reference must prove mechanism, not repeat branding |
 
-- give 2–4 viable options before committing when the decision is taste-sensitive, expensive, architectural, or motion-heavy
-- name tradeoffs for each option: doctrine fit, interaction clarity, accessibility, performance, implementation complexity, and maintenance cost
-- recommend one option instead of leaving the user with undirected choice overload
-- ask for confirmation before building broad or high-misfire-risk directions
-- skip options for tiny fixes, existing-token application, or when the user explicitly says to use judgment and proceed
+**Specimen fact:** Relics currently implements these through “The trace of a turn,” a hero→stack hairline handoff, one field note, and a static taste-template footer.
+**Transferable inference:** quiet ledgers, causal edges, maintained residue, and terminal clarity can transfer when they preserve truth and reading rhythm. The exact palette, page order, deck, and layout do not automatically transfer.
+
+This skill owns the character and restraint of these operations. `references/relics-language.md` owns specimen evidence; `references/motion-relics.md` owns motion facts; `web-design` owns implementation numbers and wiring.
 
 ## Motion Doctrine
 
-Motion should obey physical and architectural logic:
+Mass, hierarchy, causality, restraint, craft. Default: still/subtle on archive and reading; controlled on product flows; Relics scrub language when the page is a long editorial web field.
 
-- It has mass: larger surfaces move slower and with more inertia.
-- It has hierarchy: primary transitions may move; secondary chrome should stay quiet.
-- It has causality: motion must reveal why something changed.
-- It has restraint: the best motion often disappears into comprehension.
-- It has craft: easing, duration, delay, and origin should feel intentional.
+Craft numbers and `data-rv` API: `references/motion-relics.md`.
+`web-design` implements wiring; this skill owns character.
 
-Default motion posture:
+## Use Cases
 
-- still or subtle for doctrine, archive, reading, and contemplative pages
-- controlled interface-led motion for product flows
-- expressive motion only when the source system already calls for atmospheric or spatial depth
+- Critique / restyle surfaces against Hara + Relics mechanisms
+- Typography, spacing, material, motion character guidance
+- Translate product spine into quiet surface without hiding value
+- Options (2–4) for taste-sensitive surface or motion direction
+- Compare one gated external style against Hara/Relics baseline
 
-Use `references/impeccable-motion-synthesis.md` for concrete timing, easing, reduced-motion, interaction-state, performance, delight, and overdrive rules.
+### shadcn / `@twin`
 
-Avoid motion that performs intelligence instead of making the interface more intelligible.
+Use as registry/token grammar only — never as visual doctrine. Do not install React shadcn into `packages/tui`.
+
+## Non-Goals
+
+Do not invoke for pure token nits, copy fixes, or engineering bugs with no surface judgment. Execute those directly.
+
+## Reasoning and Options
+
+For non-trivial surface/motion architecture: 2–4 options with tradeoffs; recommend one; confirm before high-misfire builds. Skip options for tiny fixes or when Chief says use judgment.
 
 ## Output Expectations
 
-When using this skill:
-
-- name the grounding used: Visual Doctrine, Japanese pressure triad, Aura synthesis, and/or selected external reference
-- cite the specific reference files used when relevant
-- separate direct reference facts from implementation interpretation when stakes matter
-- produce actionable guidance for critique, planning, code work, or motion design
-- keep the response compact unless the user asks for deep synthesis
+- Name grounding used: **Hara**, **Relics**, optional Visual Doctrine, and/or gated external
+- Cite reference files when stakes matter
+- Separate specimen fact from inference
+- Actionable; compact unless deep synthesis requested
+- Never require cloning relics.quest page structure unless the job is that class of site
 
 ## Command Name
 

@@ -62,17 +62,36 @@ Operational compression:
 
 Use these when the task touches visual language, layout, motion, atmosphere, or product surface:
 
-- `japanese-design` for Visual Doctrine, ma, shibui, materiality, typography, motion restraint, and Aura system grammar
+- `japanese-design` for Hara ex-formation, ma, shibui, materiality, typography, motion character, and Relics surface grammar
 - `product-design` for functional page/product hierarchy, promise → proof → mechanism → action
 - `think-different` for product soul, category collapse, cuts, and user-visible transformation
-- `web-design` for craft execution: layout systems, motion tokens, reveal/masking, and page assembly — the bottom of the hierarchy (representation → function → surface → craft); it implements the layers above and never overrides them
+- `web-design` for craft execution: layout systems, motion tokens, Relics scrub wiring, reveal/masking, and page assembly — the bottom of the hierarchy (representation → function → surface → craft); it implements the layers above and never overrides them
 
 Compact doctrine:
 
-- Visual Doctrine: printed philosophical monograph translated into software
-- Aura: calm instrument for composing high-taste interfaces from constraint, atmosphere, and motion discipline
-- Pressure triad: Linear's structural intelligence, Capture One's photographic instrumentality, Karimoku's material soul
-- Motion: comprehension instrument before aesthetic effect
+- **Hara:** remove before decorate; emptiness is a receptive vessel (ex-formation)
+- **Relics** (https://relics.quest): living **web** specimen — proof plates, one sage accent, hairlines, scrub reading field. Extract mechanisms; do not costume-clone the page
+- Visual Doctrine / Aura: optional deep archival instrument lineage when paths exist
+- Pressure triad: Linear structure, Capture One photographic instrumentality, Karimoku material soul — pressure, not costumes
+- Motion: comprehension instrument before aesthetic effect; soft blur only as scrub **recede**, never blur-in
+
+**Web context:** when the job is public/web/landing/product page taste, load `japanese-design` references `relics-language.md` + `motion-relics.md` and craft via `web-design`. Relics is the baseline web taste specimen — not MengTo defaults.
+
+### Relics invariants for public web
+
+These are identity-level constraints extracted from the living specimen, not a mandatory page recipe:
+
+- **Proof before pitch:** show the artifact, capability, version, or operation before expanding the claim.
+- **Inspectable operation before synthetic-mind theater:** one real context → orientation → action → verification trace beats dashboards of simulated cognition.
+- **Causal continuity before decorative transition:** motion may hand one structural edge into the next representation when it explains how the system connects.
+- **One living note before a feed:** a dated authored observation may keep the work open; maintain it honestly or remove it.
+- **Endpoint clarity before atmosphere:** footers, final controls, and terminal evidence remain fully opaque, unblurred, and still.
+- **Truthful self-reference before generic placeholders:** use real Twin-Sparrow material when it can carry the proof.
+- **Additions require cuts:** a new section must supply missing conviction and compress or replace weaker explanation.
+
+> Relics is the public web expression of Twin-Sparrow taste, not a universal skin for the TUI.
+
+Transfer the invariants only when they improve comprehension, provenance, trust, pacing, or cognitive fit. Do not require the sage palette, kinetic deck, exact page order, or 7/5 grid on unrelated products.
 
 ### Research and reasoning doctrine
 
@@ -113,17 +132,23 @@ TUI consequence:
 - operation traces, memory admissions, skill activations, browser context, and model state should feel like inspectable mechanisms
 - avoid generic metrics chrome unless it changes operator judgment
 
-### 3. Monograph plus console
+### 3. Monograph plus console (and web instrument)
 
-Twin-Sparrow should hold two registers at once:
+Twin-Sparrow should hold registers that fit the medium:
 
 - monograph: reflective, archival, philosophical, research-aware
 - console: operational, typed, inspectable, fast under pressure
+- **web instrument** (Relics-class): proof before pitch, quiet editorial stack, one primary action
 
 TUI consequence:
 - long-form synthesis should feel like a research room
 - execution should feel like a clean operations console
 - the transition between them should be companion-routed, not visually chaotic
+
+Web consequence:
+- proof plates and real metrics over portfolio card chrome
+- Hara ex-formation before decorative section stacks
+- seijaku hover and scrub that serves reading — never SaaS spectacle
 
 ### 4. Synthetic mind as visible architecture
 
@@ -405,16 +430,83 @@ Purpose: make Solaris/Atoman continuity felt through operation, not roleplay.
 
 Should show companion orientation only when it helps task continuity, emotional pacing, or execution posture. Tone should emerge from routing and action, not decorative labels.
 
+### 8. Exclusive instrument cards
+
+Purpose: hold high-stakes or high-density work (plan, help, catalog) without dumping machinery into the transcript.
+
+TUI consequence:
+- Prefer one inset exclusive card over full-bleed dump or stacked chat markers
+- Card chrome: thin hairline border, optional top-center crest (`< >`), quiet header glyph, ma before footer actions
+- Scroll is sticky-follow while writing, user-owned when paused; micro vertical (and mobile horizontal) bars only when overflow requires them
+- Lifecycle lines in chat are **single and mutable** (open / closed / approved) — never stack “closed · restored” noise
+- Mid-write approve must refuse; approve only after stream complete, then execute
+
+### 9. Continuity ribbon + absence law
+
+Purpose: orientation without theater.
+
+TUI consequence:
+- One footer ribbon: pole · liveness · posture · focus (non-default) · optional next — then path/ctx/model
+- No orientation toasts in chat for posture/focus cycles
+- Soft differential redraw for footer-only updates (never full-clear that thrashs mascot image planes)
+- Force render only for exclusive surface rebuild or true resize
+
+### 10. Help as dual-pane instrument
+
+Purpose: shortcuts and command catalog as one room, not a markdown wiki dump.
+
+TUI consequence:
+- `/help` opens exclusive card; crest `< >` (spaced) switches panes: shortcuts table vs stacked command use-cases
+- Legend once: key · action — globally aligned columns; no pipe-grid tables
+- Skills/commands/prompts grouped under craft mark (`✦`); no empty “use cases” labels
+- Duplicate slash aliases (e.g. hotkeys) are cuts — one name, one surface
+
 ## Recent taste signals to preserve
 
-These are current signals from active Twin-Sparrow and TSRA-adjacent work. Treat them as live but revisable.
+These are current signals from active Twin-Sparrow, Aurelian host, and the 2026-07 TUI polish arc. Treat them as live but revisable.
 
-- Aurelian dark/light palettes: warm canvas, gold/brass accent, muted green success, serious ink, soft paper light mode.
-- TUI boxes as instrument frames: crisp borders, compact labels, state lines, operation summaries.
-- Observation-window surfaces: time, status, evidence boundary, and next watch as a disciplined ledger rather than alarmist prediction.
-- Raw-model tail cleanup: old state must not visually or conceptually leak into the current cycle.
-- Light-theme readability pass: softness cannot reduce operational legibility.
-- Operation dock pulse: motion can signal live execution when bounded and meaningful.
+### Palettes & material
+- Aurelian dark/light: warm canvas, gold/brass accent, muted green success, serious ink, soft paper light mode.
+- Softness cannot reduce operational legibility (light-theme readability pass).
+
+### Instrument frames
+- Exclusive inset cards (~84% width), hairline borders, dim chrome — not heavy slab frames.
+- Phase TODO / evidence marks (`[ ]` / `[x]`) as ledger grammar, not decoration.
+- Writing status: quiet orbit or fixed pen meaning + life; never wait-ring for “writing”.
+
+### Continuity & absence
+- Continuity ribbon collapses status islands (companion, posture, working, plan).
+- Absence law: no ops-count headers, no posture toast, no double ma stacks between blocks.
+- Companion chrome: shared quiet mark (`◌` / `›` pair when poles must differ; unified when quiet is better) + name in text weight — no “Solaris means…” lecture voice.
+
+### Motion & room tone
+- Working: morph spinner + ellipsis breath; bounded cadence.
+- Mascot: emit-once, stable Kitty id, soft resize; no full-clear on Shift+~ or bottom growth alone.
+- Plan write animation: restrained (orbit or caret), soft render only.
+
+### Host / pointer
+- Classic arrow pointer is the preferred default over hand/cosplay cursors (Chief 2026-07-10).
+- Host (Aurelian) must honor OSC 22 under mouse reporting or the TUI pointer sequence is invisible.
+
+### Product hygiene
+- One GitHub source of truth (`twin-sparrow`); legacy duplicate repos are cuts.
+- Autonomy default: auto (or last intentional save) — not plan posture by accident.
+
+### Carry-forward signals
+- Observation-window surfaces: time, status, evidence boundary, next watch as ledger.
+- Raw-model tail cleanup: old state must not leak into the current cycle.
+- Operation dock pulse: motion signals live execution when bounded and meaningful.
+
+### Web / Relics implementation evidence (current)
+- Live: https://relics.quest — local: `Aura/showcase` (+ `taste-template.html`).
+- Current material grammar: one sage accent; warm grey → paper → dark planes; hairlines over boxes.
+- Current composition grammar: 7/5 proof plates, rectangular media, status as hairline label, and one download CTA.
+- Current motion grammar: distance-from-center scrub, display line masks, causal hero→stack handoff, and soft blur as **recede only**.
+- Current cognitive proof: “The trace of a turn” exposes context → orientation → action → verification through one active hairline.
+- Current living continuity: one dated field note, maintained or removed rather than expanded into a feed.
+- Current endpoint lesson: `data-rv-stay` cannot rescue a footer that never crosses center; terminal surfaces remain outside reversible scrub.
+- Kinetic deck depth remains stack offset + hairline — **no** float drop-shadow under the front card.
+- Nav/footer logo size parity and the fill-up sage pill remain specimen-specific implementation evidence, not universal identity law.
 
 Do not freeze these into permanent law. They are current taste evidence, not universal doctrine.
 

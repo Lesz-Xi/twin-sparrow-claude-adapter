@@ -17,10 +17,16 @@ Current name: `web-design`.
 
 This skill turns design doctrine into built pages. It owns the construction layer of web
 work: grid tokens, motion tokens, reveal mechanics, material execution, assembly order,
-and QA. It is distilled from a curated pass over MengTo's Aura.build web-design pack
-(`/Users/lesz/Developer/MengTo-Skills/agent-skills/web-design`), with every admitted
-technique conformed to Twin-Sparrow doctrine and every rejected technique preserved there
-as a contrast entry.
+and QA.
+
+**Primary Twin-Sparrow craft specimen:** Relics
+(`https://relics.quest`, local `Aura/showcase`). Load
+`../japanese-design/references/motion-relics.md` and
+`../japanese-design/references/relics-language.md` for numbers and mechanisms. Extract mechanisms — do not costume-clone the Relics page.
+
+**Secondary / contrast archive:** MengTo's Aura.build web-design pack
+(`/Users/lesz/Developer/MengTo-Skills/agent-skills/web-design`) — admitted techniques
+only after conformed to Hara + Relics; rejected techniques stay as contrast entries.
 
 > Execution is where doctrine survives or dies. A page that is right in representation,
 > function, and surface — and wrong in craft — is wrong.
@@ -53,9 +59,9 @@ Then enforce every gate check:
 |---|---|---|
 | Representation | `think-different` | What the page is; category; soul; what to cut |
 | Function | `product-design` | Value spine, proof order, the one primary action |
-| Surface | `japanese-design` | Ma, shibui, materiality, type voice, motion character |
-| Identity | `twin-sparrow-taste` | Chief's taste constants; instrument over dashboard |
-| **Craft** | **`web-design`** | **Grid tokens, motion tokens, reveals, assembly, QA** |
+| Surface | `japanese-design` | Hara + Relics character: ma, shibui, type, motion feel |
+| Identity | `twin-sparrow-taste` | Chief's taste; TUI instrument + web Relics specimen |
+| **Craft** | **`web-design`** | **Grid tokens, Relics scrub wiring, reveals, assembly, QA** |
 
 Conflict rule: this skill never overrides an upper layer. If a craft decision would
 reorder the value spine, demote the primary action, or contradict surface doctrine,
@@ -72,10 +78,14 @@ Distilled from: `agency-grid-layout-minimal`, `container-lines`, `framed-grid-la
 
 - Wide page shell with explicit columns; every section snaps to the same grid.
 - Dominant headline spans most of the grid; supporting copy anchors in a narrow side
-  column. Asymmetry over centering when the page is expressive or conceptual.
+  column. Prefer **7/5 asymmetry** (Relics) over centering when the page is expressive
+  or conceptual.
 - Generous negative space is structural (ma), never leftover. Do not fill a gap because
   it exists.
-- Imagery as large architectural blocks, never card galleries.
+- Imagery / proof media as large architectural blocks or proof plates — never equal SaaS
+  card galleries.
+- Relics proof-plate pattern: media before meta, hairline under description, gutters from
+  grid gap (not meta padding chrome).
 
 ```css
 :root {
@@ -166,34 +176,43 @@ Gothic New, Klee One as sparse accent). This skill executes scale and rhythm.
 
 ## Motion Engineering
 
-Distilled from: `animation-systems` (token doctrine), `cinematic-gsap-lenis-motion-system`
-and `cinematic-scroll-storytelling` (engineering harvest), `gsap-scrolltrigger-storytelling`
-(pin discipline), `animation-on-scroll`, `masked-reveal`.
+**Primary numbers:** `../japanese-design/references/motion-relics.md` (Relics scrub + line mask).
+Secondary harvest: MengTo cinematic packs — only where they do not contradict Relics/Hara.
 
 Motion exists to explain hierarchy, confirm action, guide attention, and maintain
 continuity. If a movement serves none of those, delete it. One strong hero moment per
 page; everything else is supporting motion. Motion character (mass, restraint, stillness)
 is decided by `japanese-design`; this section supplies the numbers and wiring.
 
-### Motion tokens
+### Motion tokens (Relics-aligned)
 
 | Token | Value |
 |---|---|
-| Micro (hover, press) | 120–200ms |
-| UI state change | 180–260ms |
-| Small transition (popover, toast) | 220–320ms |
-| Section entrance | 400–800ms |
-| Hero sequence | 800–1600ms, with internal beats |
-| Easing | ease-out family (`power3.out`, `power4.out`, `expo.out`); ease-in for exits |
-| Stagger | 40–90ms per element; words 35–70ms; smaller on mobile |
-| Standard offsets | 8 / 16 / 24 / 32px rise |
-| Reveal trigger | `start: "top 82%"`, animate once |
-| Scroll scrub | 0.8–1.4 only inside earned pinned scenes |
+| Micro (hover, press) | 160ms (`--dur-micro`) |
+| UI state change | 240ms (`--dur-ui`) |
+| Fill-up pill | ~500ms ease-fill |
+| Easing | `power3.out` / cubic-bezier(.22,1,.36,1); ease-in for exits |
+| Stagger | 40–90ms; smaller on mobile |
+| Scrub y | ~18–32px (content vs proof plate) |
+| Scrub scale (plates) | base 0.98 → 1 |
+| Scrub blur | recede only, ~2–5px — **never blur-in** |
+| Line mask | `--ln-y` ~108% → 0 |
+| Clip wipe | ~1.05–1.1s on media |
+| GSAP pin scrub | 0.8–1.4 only inside earned pinned scenes |
 
 Hard rules: animate `transform` and `opacity` only (short-lived `clip-path` allowed for
-reveals). No elastic or bounce. No blur-in entrances — the `blur(8px) → 0` flourish is
-stripped from every admitted recipe. No animated layout properties. `will-change` only on
-elements that actually animate.
+reveals). No elastic or bounce. **No blur-in entrances.** Soft blur is allowed only as
+**scrub recede** when leaving the reading band (Relics). No animated layout properties.
+`will-change` only on elements that actually animate.
+
+### Relics scrub API (preferred for Twin-Sparrow editorial web)
+
+Markup: `data-rv`, `data-rv-scale`, optional `data-rv-stay`; display heads `.disp` +
+`.lnw` / `.ln-line`. CSS vars: `--scrub-o`, `--scrub-y`, `--scrub-scale`, `--scrub-blur`.
+Progress from distance-to-viewport-center; lerp + rAF; Lenis `scroll` should schedule the
+same update. Full pseudocode and reduced-motion: `../japanese-design/references/motion-relics.md`.
+
+Do not apply reversible scrub to terminal elements that cannot cross the reading band. `data-rv-stay` only holds an element clear after a geometrically possible center crossing; footers and final controls default to static clarity.
 
 ### Setup (GSAP + Lenis, when smooth scroll is earned)
 
@@ -370,8 +389,10 @@ genuinely float above the page plane — popovers, modals, dragged elements:
   0px 24px 24px -12px rgba(0, 0, 0, 0.06);
 ```
 
-Never on resting cards, list items, or section blocks. Never tinted. Never stacked with
-other shadow utilities. Elevation-as-decoration is banned; elevation-as-fact is one token.
+Never on resting cards, list items, section blocks, or Relics kinetic **front** cards
+(depth from stack offset + hairline only). Never tinted. Never stacked with other shadow
+utilities. Elevation-as-decoration is banned; elevation-as-fact is one token for true
+floating UI only (popover/modal/drag).
 
 ## Page Assembly
 
@@ -412,6 +433,10 @@ texture, and imagery removed.
 - No CLS from reveals or pins; pinned sections hand off cleanly.
 - Canvas/DPR clamped 1–2 on any heavy surface; `ctx.revert()` verified on SPA routes.
 - Contrast passes on both themes; text clears all frame lines; focus states visible.
+- **Trace ledger:** when used, preserve a 7/5 reading composition, one active hairline, and one active state; no dashboard containers or fake telemetry.
+- **Causal handoff:** measure source and target edges; stretch before descent; use transform/opacity only; no pin or scroll trap; reduced motion resolves to aligned static rules.
+- **Endpoint audit:** at maximum scroll inspect computed `opacity`, `filter`, and `transform`; footers, legal copy, and final controls must resolve to `1`, `none`, and `none` unless a different state is explicitly functional.
+- Footer and terminal contrast are verified independently from motion state; residual opacity must not disguise itself as tasteful softness.
 - The page still reads as designed with every decorative layer stripped.
 
 ## Banned by Default (Earn-Back Conditions)
@@ -459,7 +484,9 @@ Each entry: the ban, the narrow earn-back, and where the technique record is pre
   time is real and the loader is honest progress. Record: `cinematic-scroll-storytelling`
   (contrasted portions noted in its provenance).
 - **Blur-in reveals (`blur(8px) → 0`)** — trendy flourish stripped from all admitted
-  recipes. Earn-back: none; masked rise carries the same rhythm honestly.
+  recipes. Earn-back: none; masked rise or Relics scrub clarity carries entrance.
+  **Note:** soft blur as scrub *recede* (exit) is admitted per Relics; do not conflate
+  with blur-in.
 
 ## Composition Rules
 

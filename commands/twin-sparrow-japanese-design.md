@@ -1,5 +1,5 @@
 ---
-description: "Apply Japanese design doctrine, reference grounding, typography, spacing, restraint, motion, and visual-system critique for product and UI work."
+description: "Apply Japanese design doctrine grounded in Kenya Hara (ex-formation) and the Relics living web specimen: ma, shibui, typography, spacing, restraint, motion character, and surface critique. Use for..."
 argument-hint: "<task, question, or artifact to apply this skill to>"
 ---
 

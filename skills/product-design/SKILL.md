@@ -20,17 +20,41 @@ This skill is a sibling, not a replacement.
 
 - `think-different` → representation. What is this page really? (run first when the concept is ambiguous)
 - `product-design` → function. What must the page communicate, prove, and make the user do?
-- `japanese-design` → surface. How does it feel: ma, shibui, wabi-sabi, typography, motion, material.
-- `web-design` → craft. How the page is built: grid systems, motion engineering, reveal techniques, and page assembly. It executes this skill's structure and japanese-design's surface; it never reorders the value spine or demotes the primary action.
+- `japanese-design` → surface. How does it feel: Hara ex-formation, ma, shibui, Relics character, typography, motion feel.
+- `web-design` → craft. How the page is built: grids, Relics scrub wiring, reveals, assembly. Executes structure + surface; never reorders the value spine or demotes the primary action.
 
 ### Composition rule (load-bearing)
 
 When this skill and `japanese-design` conflict:
 
 - **Function and clarity win on structure.** Information hierarchy, value order, proof placement, and the primary action are decided by product-design.
-- **Japanese doctrine wins on surface.** Spacing rhythm, type voice, restraint, motion character, and material feel are decided by japanese-design.
+- **Japanese doctrine wins on surface.** Spacing rhythm, type voice, restraint, motion character, and material feel are decided by japanese-design (Hara + Relics mechanisms).
 
 Never let conversion pressure destroy restraint, and never let restraint hide the product's value or bury the primary action. If the two genuinely collide, surface the tradeoff instead of silently picking one.
+
+### Worked example: Relics (https://relics.quest)
+
+Relics shows the spine without loud conversion theater. Use as a **reference argument**, not a template stamp:
+
+| Functional job | Relics surface |
+|----------------|----------------|
+| Orientation | Kinetic hero stack |
+| Mechanism | “How the three nest” trio |
+| Inspectable operation | “The trace of a turn” — context → orientation → action → verification |
+| Transfer | “The taste, in the open” + downloadable HTML specimen |
+| Product proof | Project plates with **real** versions and counts |
+| Living continuity | One maintained, dated field note |
+| Action | One download CTA |
+
+Proof can be quiet and still primary. Surface handoff: `japanese-design` + `web-design` Relics references.
+
+### Evidence-bearing section rule
+
+A new section is justified only when it supplies a missing form of conviction: orientation, mechanism, inspectable operation, transfer, product proof, continuity, objection resolution, or action. A section that merely restates an existing claim is not structure; it is repetition.
+
+### Section-budget rule
+
+Every addition must be paid for by compressing, replacing, or removing weaker explanation. In Relics, adding the inspectable turn required shortening repeated Taste copy. Page length is an attention budget, not free space.
 
 ## Typography, motion, and animation handoff
 
@@ -52,7 +76,7 @@ Product-design decides what typography, motion, and animation must accomplish:
 - animation timing, easing, inertia, and reduced-motion behavior
 - material transitions, photographic sequencing, and surface tactility
 
-When typography is needed, load `japanese-design` typography guidance. When motion or animation is needed, load `japanese-design` motion doctrine. Do not invent a separate Western motion language unless the user explicitly asks.
+When typography is needed, load `japanese-design` (Hara + Relics type). When motion or animation is needed, load `japanese-design` motion character and `../japanese-design/references/motion-relics.md` via craft — do not invent a separate Western motion language unless the user explicitly asks.
 
 Product-design may require a heading to be stronger, a CTA to be more visible, a proof block to appear earlier, or an interaction to reveal causality. But `japanese-design` determines the letterform, weight, spacing, easing, restraint, and material expression used to satisfy that requirement.
 

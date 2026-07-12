@@ -14,7 +14,7 @@
 //   --check   verifies committed output matches what would be generated,
 //             exits 1 on drift without writing anything
 
-import { existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, realpathSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -77,6 +77,77 @@ function readResolvedSkillMarkdown(root, name) {
     throw new Error(`resolved skill path is not a regular file for ${name}: ${real}`);
   }
   return readFileSync(real, "utf8");
+}
+
+// Supporting-content subdirectories that ship alongside a skill's SKILL.md.
+// Deliberately narrow: only curated reference material is carried into the
+// plugin surface. Build/runtime junk (node_modules, dist, scripts, __pycache__,
+// requirements.txt, *.pyc) is never a skill "asset" and stays out.
+const SKILL_ASSET_DIRS = ["references"];
+
+// Collect the curated supporting files (references/**) for a skill so the
+// generated plugin surface is self-contained. Returns [{ relPath, outPath,
+// content }]; dotfiles are skipped. Symlinks are resolved so real, portable
+// bytes land in the surface rather than dangling links.
+function collectSkillAssets(root, name) {
+  const resolvedRoot = resolve(root);
+  const skillDir = resolve(resolvedRoot, name);
+  if (skillDir !== resolvedRoot && !skillDir.startsWith(`${resolvedRoot}/`)) {
+    throw new Error(`skill path escaped root for ${name}: ${skillDir}`);
+  }
+  if (!existsSync(skillDir)) return [];
+  const realSkillDir = realpathSync(skillDir);
+  const assets = [];
+  const walk = (absDir, relDir) => {
+    for (const entry of readdirSync(absDir, { withFileTypes: true })) {
+      if (entry.name.startsWith(".")) continue; // skip .DS_Store and other dotfiles
+      const abs = join(absDir, entry.name);
+      const rel = relDir ? join(relDir, entry.name) : entry.name;
+      const stat = statSync(abs); // follows symlinks
+      if (stat.isDirectory()) {
+        walk(abs, rel);
+      } else if (stat.isFile()) {
+        assets.push({
+          relPath: rel,
+          outPath: join(SKILLS_OUT_DIR, name, rel),
+          content: readFileSync(realpathSync(abs)),
+        });
+      }
+    }
+  };
+  for (const assetDir of SKILL_ASSET_DIRS) {
+    const abs = join(realSkillDir, assetDir);
+    if (existsSync(abs) && statSync(abs).isDirectory()) walk(abs, assetDir);
+  }
+  return assets;
+}
+
+// List every file (relative path) under a generated skill's output directory,
+// so runWrite can prune stale references and runCheck can flag extras.
+function listFilesRecursive(dir, relBase = "") {
+  if (!existsSync(dir)) return [];
+  const out = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const rel = relBase ? join(relBase, entry.name) : entry.name;
+    if (entry.isDirectory()) {
+      out.push(...listFilesRecursive(join(dir, entry.name), rel));
+    } else if (entry.isFile()) {
+      out.push(rel);
+    }
+  }
+  return out;
+}
+
+// Remove empty subdirectories left behind after pruning stale reference files.
+// Never removes the skill root itself, only now-empty descendants.
+function pruneEmptyDirs(root) {
+  if (!existsSync(root)) return;
+  for (const entry of readdirSync(root, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const child = join(root, entry.name);
+    pruneEmptyDirs(child);
+    if (readdirSync(child).length === 0) rmSync(child, { recursive: true, force: true });
+  }
 }
 
 function parseFrontmatter(content) {
@@ -171,6 +242,7 @@ function computePlan(allowlistedSkills) {
       commandName,
       skillMarkdownPath: join(SKILLS_OUT_DIR, name, "SKILL.md"),
       skillMarkdownContent: content,
+      assets: collectSkillAssets(skillRoot, name),
       commandMarkdownPath: join(COMMANDS_OUT_DIR, `${commandName}.md`),
       commandMarkdownContent: buildCommandMarkdown(commandName, name, description),
     };
@@ -216,6 +288,21 @@ function runCheck(plan) {
     } else if (readFileSync(item.commandMarkdownPath, "utf8") !== item.commandMarkdownContent) {
       problems.push(`out of date command file: commands/${item.name}.md`);
     }
+
+    for (const asset of item.assets) {
+      if (!existsSync(asset.outPath)) {
+        problems.push(`missing generated reference file: skills/${item.name}/${asset.relPath}`);
+      } else if (!readFileSync(asset.outPath).equals(asset.content)) {
+        problems.push(`out of date reference file (source changed): skills/${item.name}/${asset.relPath}`);
+      }
+    }
+
+    const expectedAssetPaths = new Set(["SKILL.md", ...item.assets.map((asset) => asset.relPath)]);
+    for (const rel of listFilesRecursive(join(SKILLS_OUT_DIR, item.name))) {
+      if (!expectedAssetPaths.has(rel)) {
+        problems.push(`stale generated reference file not in source: skills/${item.name}/${rel}`);
+      }
+    }
   }
 
   const expectedSkillNames = new Set(plan.map((item) => item.name));
@@ -253,15 +340,33 @@ function runWrite(plan) {
     console.log(`[generate-skill-plugin] removed stale command file: commands/${entry}`);
   }
 
+  let assetCount = 0;
   for (const item of plan) {
     mkdirSync(dirname(item.skillMarkdownPath), { recursive: true });
     writeFileSync(item.skillMarkdownPath, item.skillMarkdownContent, "utf8");
+
+    for (const asset of item.assets) {
+      mkdirSync(dirname(asset.outPath), { recursive: true });
+      writeFileSync(asset.outPath, asset.content);
+      assetCount += 1;
+    }
+
+    // Prune reference files that no longer exist in the source skill.
+    const outSkillDir = join(SKILLS_OUT_DIR, item.name);
+    const expectedAssetPaths = new Set(["SKILL.md", ...item.assets.map((asset) => asset.relPath)]);
+    for (const rel of listFilesRecursive(outSkillDir)) {
+      if (!expectedAssetPaths.has(rel)) {
+        rmSync(join(outSkillDir, rel), { force: true });
+        console.log(`[generate-skill-plugin] removed stale reference file: skills/${item.name}/${rel}`);
+      }
+    }
+    pruneEmptyDirs(outSkillDir);
 
     mkdirSync(dirname(item.commandMarkdownPath), { recursive: true });
     writeFileSync(item.commandMarkdownPath, item.commandMarkdownContent, "utf8");
   }
 
-  console.log(`[generate-skill-plugin] wrote ${plan.length} skill(s) to skills/ and commands/.`);
+  console.log(`[generate-skill-plugin] wrote ${plan.length} skill(s) (${assetCount} reference file(s)) to skills/ and commands/.`);
 }
 
 async function main() {
