@@ -1,5 +1,5 @@
 ---
-description: "Reframe product, design, strategy, interface, and platform problems through source-backed Jobs-like representation-shift operations without imitating Steve Jobs. Use when the user asks to think dif..."
+description: "Converge product, design, strategy, interface, platform, feature-set, and experience questions into a coherent Twin-Sparrow product decision. Use when the work requires identifying the user-visible..."
 argument-hint: "<task, question, or artifact to apply this skill to>"
 ---
 

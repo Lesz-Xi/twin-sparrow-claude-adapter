@@ -1,5 +1,5 @@
 ---
-description: "Search, retrieve, and synthesize arXiv and research literature for Chief's research questions. Use when Chief asks for literature search, arXiv papers, related work, paper discovery, recent researc..."
+description: "Conduct disciplined scientific literature research across arXiv, journals, DOI pages, and primary research sources. Use when the user asks for arXiv paper discovery, journal literature review, prio..."
 argument-hint: "<task, question, or artifact to apply this skill to>"
 ---
 
