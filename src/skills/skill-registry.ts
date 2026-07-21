@@ -1,6 +1,6 @@
 import { existsSync, lstatSync, readFileSync, realpathSync, statSync } from "node:fs";
 import { homedir } from "node:os";
-import { join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 
 export const MAX_SKILL_BODY_BYTES = 128 * 1024;
 
@@ -14,6 +14,7 @@ export const ALLOWLISTED_SKILLS = [
   "expert-engineer",
   "expert-review",
   "first-principles-thinking",
+  "grounded-collaboration",
   "grounded-writing",
   "japanese-design",
   "lifetime-research",
@@ -104,7 +105,18 @@ export function hydrateSkillBody(name: string, options: SkillHydrationOptions = 
   const realRoot = realpathSync(root);
   const realCandidate = realpathSync(candidate);
   if (!realCandidate.startsWith(`${realRoot}/`)) {
-    return blocked(name, "real skill path escaped the allowlisted skill root");
+    // The canonical Twin-Sparrow layout authors skills in the source repo and
+    // symlinks each one into the skill root, so a skill directory legitimately
+    // resolves outside the root. Containment then holds against the resolved
+    // skill directory instead: the body must be the SKILL.md sitting directly
+    // inside whatever `<root>/<name>` points at, so a link can relocate a skill
+    // but cannot redirect its body to an unrelated file. SKILL.md itself is
+    // still refused above when it is a symlink, which is what closes the gap
+    // this weaker containment would otherwise open.
+    const realSkillDir = realpathSync(resolve(root, name));
+    if (dirname(realCandidate) !== realSkillDir) {
+      return blocked(name, "real skill path escaped its skill directory");
+    }
   }
 
   return {
