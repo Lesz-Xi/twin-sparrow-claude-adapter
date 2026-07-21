@@ -1,6 +1,6 @@
 {
   "name": "twin-sparrow",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Token-efficient Twin-Sparrow runtime capsule adapter for Claude Code and Codex CLI.",
   "author": {
     "name": "Lesz-Xi"

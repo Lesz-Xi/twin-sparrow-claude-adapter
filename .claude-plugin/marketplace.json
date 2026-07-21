@@ -5,13 +5,13 @@
   },
   "metadata": {
     "description": "Marketplace exposing the twin-sparrow runtime capsule adapter (companion continuity, capsules, verification gate, and Twin-Sparrow skill surface) for Claude Code and Codex CLI.",
-    "version": "0.0.2"
+    "version": "0.0.3"
   },
   "plugins": [
     {
       "name": "twin-sparrow",
       "description": "Token-efficient Twin-Sparrow runtime capsule adapter for Claude Code and Codex CLI.",
-      "version": "0.0.2",
+      "version": "0.0.3",
       "author": {
         "name": "Lesz-Xi"
       },
